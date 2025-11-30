@@ -6,17 +6,17 @@
 namespace Swarm
 {
     template<typename T, typename U>
-    concept Addable = require(T a, U b) {
+    concept Addable = requires(T a, U b) {
         a + b;
     }
 
     template<typename T, typename U>
-    concept Multipliable = require(T a, U b) {
+    concept Multipliable = requires(T a, U b) {
         a * b;
     }
 
     template<typename T, typename U, typename V>
-    concept TriComparable = require(T a, U b, V c) {
+    concept TriComparable = requires(T a, U b, V c) {
         a <= b <= c;
     }
     
@@ -49,18 +49,18 @@ namespace Swarm
             }
         }
 
-        template<typename U> requires Addable<T, U>()
+        template<typename U> requires Addable<T, U>
         Point<T, dim> operator+(Point<U, dim>& other) const {}
 
-        template<typename U> requires Multipliable<T, U>()
+        template<typename U> requires Multipliable<T, U>
         Point<T, dim> operator*(U other) const {}
 
-        template<typename U> requires Multipliable<T, U>()
+        template<typename U> requires Multipliable<T, U>
         Point<T, dim> operator*(Point<U, dim>& other) const {}
 
         T& operator[](size_t index) const {}
 
-        template<typename U, typename V> requires TriComparable<U, T, V>()
+        template<typename U, typename V> requires TriComparable<U, T, V>
         Point<T, dim> clamp(Point<U, dim>& a, Point<V, dim>& b) {}
     
     private:
