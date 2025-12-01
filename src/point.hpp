@@ -11,11 +11,6 @@ namespace Swarm
     }
 
     template<typename T, typename U>
-    concept Addable = requires(T a, U b) {
-        a + b;
-    }
-
-    template<typename T, typename U>
     concept Multipliable = requires(T a, U b) {
         a * b;
     }
