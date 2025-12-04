@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <ostream>
 
 namespace Swarm
 {
@@ -67,7 +68,7 @@ namespace Swarm
             }
         }
 
-        Point(const std::function<T(size_t)>& generator)
+        Point(const std::function<T(size_t)> &generator)
         {
             for (size_t i = 0; i < dim; i++)
             {
@@ -79,9 +80,8 @@ namespace Swarm
             requires Addable<T, U>
         Point<T, dim> operator+(const Point<U, dim> &other) const
         {
-            return Point<T, dim>([this, &other](size_t index) {
-                return coordinates[index] + other.coordinates[index];
-            });
+            return Point<T, dim>([this, &other](size_t index)
+                                 { return coordinates[index] + other.coordinates[index]; });
         }
 
         template <typename U>
@@ -116,17 +116,32 @@ namespace Swarm
 
         T &operator[](size_t index) const {}
 
+        constexpr int getDimensions() const
+        {
+            return dim;
+        }
+
         template <typename U, typename V>
             requires TriComparable<U, T, V>
         Point<T, dim> clamp(Point<U, dim> &a, Point<V, dim> &b)
         {
         }
 
+        friend std::ostream &operator<<(std::ostream &os, const Point<T, dim>& p)
+        {
+            os << "[ ";
+            for (size_t i = 0; i < dim; i++)
+            {
+                os << p.coordinates[i] << ", ";
+            }
+            os << "]";
+
+            return os;
+        }
+
     private:
         T coordinates[dim];
     };
 };
-
-
 
 #endif
