@@ -8,23 +8,22 @@ namespace Swarm
     template<typename T, typename U>
     concept Addable = requires(T a, U b) {
         a + b;
-    }
+    };
 
     template<typename T, typename U>
-    concept Addable = requires(T a, U b) {
+    concept Subtractable = requires(T a, U b) {
         a - b;
-    }
+    };
 
     template<typename T, typename U>
     concept Multipliable = requires(T a, U b) {
         a * b;
-    }
+    };
 
     template<typename T, typename U, typename V>
     concept TriComparable = requires(T a, U b, V c) {
         a <= b <= c;
-    }
-    
+    };
 
     template <typename T = float, int dim = 2>
     class Point
@@ -57,7 +56,7 @@ namespace Swarm
         template<typename U> requires Addable<T, U>
         Point<T, dim> operator+(Point<U, dim>& other) const {}
 
-        template<typename U> requires Addable<T, U>
+        template<typename U> requires Subtractable<T, U>
         Point<T, dim> operator-(Point<U, dim>& other) const {}
 
         template<typename U> requires Multipliable<T, U>
