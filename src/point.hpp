@@ -124,7 +124,15 @@ namespace Swarm
                                  { return coordinates[index] / other.coordinates[index]; });
         }
 
-        T &operator[](size_t index) const {}
+        T operator[](size_t index) const
+        {
+            return coordinates[index];
+        }
+
+        T &operator[](size_t index)
+        {
+            return coordinates[index];
+        }
 
         constexpr int getDimensions() const
         {
