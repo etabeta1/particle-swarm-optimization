@@ -55,7 +55,7 @@ namespace Swarm
         void updateSpeed(const Point<T, dim>& gBest, int it, int maxiter);
 
     public:
-        void updatelBest();
+        void updatelBest(int it);
     };
 
     template <typename T = float,int dim = 2>
@@ -71,7 +71,7 @@ namespace Swarm
         // v(t+1) = w*v(t) + k1*(pBest - x(t)) + k2*(gBest - x(t))
         // k1 = rand[0,1] * 2.5
         // k2 = rand[0,1] * 2.5
-        // w = 0.9 - (0.5 * iteration) / maxIterations) is the dynamic inertia weight
+        // w = 0.9 - (0.5 * it) / maxiter) is the dynamic inertia weight
 
         float w = 0.9f - ((0.5f * static_cast<float>(it)) / static_cast<float>(maxiter));
 
@@ -83,6 +83,21 @@ namespace Swarm
         Point<T, dim> social = (global_best - this->position) * k2;
 
         speed = inertia + cognitive + social;
+    }
+    template <typename T, int dim>
+    void NormalParticle<T, dim>::updatelBest(int it)
+    {
+        if(it==0){
+            this->lBest_value = Function::evaluate(this->position);
+            this->lBest=this->position;
+        }
+        else{
+            if(Function::evaluate(Point<)>lBest_value){
+                this->lBest_value=Function::evaluate(this->position);
+                this->lBest=this->position;
+            }
+        }
+
     }
 }
 #endif
