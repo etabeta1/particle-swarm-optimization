@@ -13,6 +13,7 @@ namespace Swarm
     {
     public:
         float evaluate(Point<T, dim>& p) const;
+        virtual ~Function() = default;
     };
 
     template <typename T = float, int dim = 2>
@@ -24,6 +25,8 @@ namespace Swarm
         float gBest_value;
         Point<T, dim> a;
         Point<T, dim> b;
+        int current_iteration;
+        int max_iterations;
 
     public:
         void findGBest();
@@ -55,7 +58,7 @@ namespace Swarm
         void updateSpeed(const Point<T, dim>& gBest, int it, int maxiter);
 
     public:
-        void updatelBest();
+        void updatelBest(int it);
     };
 
     template <typename T = float,int dim = 2>
@@ -84,5 +87,62 @@ namespace Swarm
 
         speed = inertia + cognitive + social;
     }
+
+    template <typename T, int dim>
+    void Swarm<T, dim>::findGbest()
+    {
+        for (const auto& particle : particles)
+        {
+            float fitness = /* evaluate fitness of particle.position */;
+            if (fitness < gBest_value)
+            {
+                gBest_value = fitness;
+                gBest = particle.position;
+            }
+        }
+    }
+
+    template <typename T, int dim>
+    void Swarm<T, dim>::updateEveryone(){
+        for(auto& particle : particles){
+            particle.updateSpeed(this->gBest, current_iteration, max_iterations);
+            particle.updatePosition();
+            particle.updatelBest(); //maybe is useful to update lBest directly in the particle updatePosition method
+        }
+    }
+
+    template <typename T = float, int dim = 2>
+
+
+    class SphereFunction : public Function<T, dim>
+    {
+    public:
+        float evaluate(const Point<T, dim>& p) const override {
+            float sum = 0.0f;  
+            for (int i = 0; i < dim; ++i) {
+                sum += p[i] * p[i]; 
+            }
+            return sum;
+        }
+    };
+
+template <typename T, int dim>
+    void NormalParticle<T, dim>::updatelBest(int it)
+    {
+        if(it==0){
+            this->lBest_value = Function::evaluate(this->position);
+            this->lBest=this->position;
+        }
+        else{
+            if(Function::evaluate(Point<)>lBest_value){
+                this->lBest_value=Function::evaluate(this->position);
+                this->lBest=this->position;
+            }
+        }
+
+    }
+
+
+    
 }
 #endif
