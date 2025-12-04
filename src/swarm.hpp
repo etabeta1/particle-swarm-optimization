@@ -33,16 +33,17 @@ namespace Swarm
     template <typename T = float, int dim = 2>
     class Particle
     {
-    private:
+    protected:
         Point<T, dim> position;
         Point<T, dim> lBest;
 
     public:
         void updatePosition();
+        virtual ~Particle() {}
     };
 
     template <typename T = float, int dim = 2>
-    class NormalParticle : Particle<T>
+    class NormalParticle : public Particle<T, dim>
     {
     private:
         Point<T, dim> speed;
@@ -50,6 +51,7 @@ namespace Swarm
         float c2 = 2.5f;
         // float w; dynamic inertia weight
         float lBest_value;
+
         void updateSpeed(const Point<T, dim>& gBest, int it, int maxiter);
 
     public:
@@ -63,7 +65,7 @@ namespace Swarm
     };
 
     template <typename T, int dim>
-    void NormalParticle<T, dim>::updateSpeed(const Point<T, dim>& gBest, int it, int maxiter)
+    void NormalParticle<T, dim>::updateSpeed(const Point<T, dim>& global_best, int it, int maxiter)
     {
         // CHOPSO velocity update formula
         // v(t+1) = w*v(t) + k1*(pBest - x(t)) + k2*(gBest - x(t))
@@ -77,8 +79,8 @@ namespace Swarm
         float k2 = Funcs::randFloat(0.0f, 1.0f) * c2;
 
         Point<T, dim> inertia = speed * w;
-        Point<T, dim> cognitive = (this->lBest - this->position) * k1;
-        Point<T, dim> social = (gBest - this->position) * k2;
+        Point<T, dim> cognitive = (this->personal_best - this->position) * k1;
+        Point<T, dim> social = (global_best - this->position) * k2;
 
         speed = inertia + cognitive + social;
     }

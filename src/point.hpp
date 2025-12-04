@@ -11,6 +11,11 @@ namespace Swarm
     }
 
     template<typename T, typename U>
+    concept Addable = requires(T a, U b) {
+        a - b;
+    }
+
+    template<typename T, typename U>
     concept Multipliable = requires(T a, U b) {
         a * b;
     }
@@ -51,6 +56,9 @@ namespace Swarm
 
         template<typename U> requires Addable<T, U>
         Point<T, dim> operator+(Point<U, dim>& other) const {}
+
+        template<typename U> requires Addable<T, U>
+        Point<T, dim> operator-(Point<U, dim>& other) const {}
 
         template<typename U> requires Multipliable<T, U>
         Point<T, dim> operator*(U other) const {}
