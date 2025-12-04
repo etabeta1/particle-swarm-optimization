@@ -13,6 +13,7 @@ namespace Swarm
     {
     public:
         float evaluate(Point<T, dim>& p) const;
+        virtual ~Function() = default;
     };
 
     template <typename T = float, int dim = 2>
@@ -109,5 +110,22 @@ namespace Swarm
             particle.updatelBest(); //maybe is useful to update lBest directly in the particle updatePosition method
         }
     }
+
+    template <typename T = float, int dim = 2>
+
+
+    class SphereFunction : public Function<T, dim>
+    {
+    public:
+        float evaluate(const Point<T, dim>& p) const override {
+            float sum = 0.0f;  
+            for (int i = 0; i < dim; ++i) {
+                sum += p[i] * p[i]; 
+            }
+            return sum;
+        }
+    };
+
+    
 }
 #endif
