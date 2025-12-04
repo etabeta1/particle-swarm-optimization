@@ -118,8 +118,10 @@ namespace Swarm
 
         template <typename U>
             requires Divisible<T, U>
-        Point<T, dim> operator/(Point<U, dim> &other) const
+        Point<T, dim> operator/(const Point<U, dim> &other) const
         {
+            return Point<T, dim>([this, &other](size_t index)
+                                 { return coordinates[index] / other.coordinates[index]; });
         }
 
         T &operator[](size_t index) const {}
