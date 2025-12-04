@@ -124,6 +124,14 @@ namespace Swarm
                                  { return coordinates[index] / other.coordinates[index]; });
         }
 
+        template <typename U, typename V>
+            requires TriComparable<U, T, V>
+        Point<T, dim> clamp(const Point<U, dim> &a, const Point<V, dim> &b) const
+        {
+            return Point<T, dim>([this, &a, &b](size_t index)
+                                 { return std::max(a[index], std::min(coordinates[index], b[index])); });
+        }
+
         T operator[](size_t index) const
         {
             return coordinates[index];
@@ -137,12 +145,6 @@ namespace Swarm
         constexpr int getDimensions() const
         {
             return dim;
-        }
-
-        template <typename U, typename V>
-            requires TriComparable<U, T, V>
-        Point<T, dim> clamp(Point<U, dim> &a, Point<V, dim> &b)
-        {
         }
 
         friend std::ostream &operator<<(std::ostream &os, const Point<T, dim> &p)
