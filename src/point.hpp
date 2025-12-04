@@ -53,6 +53,12 @@ namespace Swarm
             }
         }
 
+        Point(std::function<T(size_t)> generator) {
+            for(size_t i = 0; i < dim; i++) {
+                coordinates[i] = generator(i);
+            }
+        }
+
         template<typename U> requires Addable<T, U>
         Point<T, dim> operator+(Point<U, dim>& other) const {}
 
