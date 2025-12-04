@@ -24,6 +24,8 @@ namespace Swarm
         float gBest_value;
         Point<T, dim> a;
         Point<T, dim> b;
+        int current_iteration;
+        int max_iterations;
 
     public:
         void findGBest();
@@ -83,6 +85,29 @@ namespace Swarm
         Point<T, dim> social = (global_best - this->position) * k2;
 
         speed = inertia + cognitive + social;
+    }
+
+    template <typename T, int dim>
+    void Swarm<T, dim>::findGbest()
+    {
+        for (const auto& particle : particles)
+        {
+            float fitness = /* evaluate fitness of particle.position */;
+            if (fitness < gBest_value)
+            {
+                gBest_value = fitness;
+                gBest = particle.position;
+            }
+        }
+    }
+
+    template <typename T, int dim>
+    void Swarm<T, dim>::updateEveryone(){
+        for(auto& particle : particles){
+            particle.updateSpeed(this->gBest, current_iteration, max_iterations);
+            particle.updatePosition();
+            particle.updatelBest(); //maybe is useful to update lBest directly in the particle updatePosition method
+        }
     }
 }
 #endif
