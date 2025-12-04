@@ -94,8 +94,10 @@ namespace Swarm
 
         template <typename U>
             requires Multipliable<T, U>
-        Point<T, dim> operator*(U other) const
+        Point<T, dim> operator*(const U &other) const
         {
+            return Point<T, dim>([this, &other](size_t index)
+                                 { return coordinates[index] * other; });
         }
 
         template <typename U>
