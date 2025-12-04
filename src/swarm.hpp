@@ -8,28 +8,45 @@
 
 namespace Swarm
 {
+    // Class declarations
     template <typename T = float, int dim = 2>
     class Function
     {
     public:
-        float evaluate(Point<T, dim>& p) const;
+        virtual float evaluate(const Point<T, dim>& p) const = 0;
         virtual ~Function() = default;
+    };
+
+    template <typename T = float, int dim = 2>
+    class SphereFunction : public Function<T, dim>
+    {
+    public:
+        float evaluate(const Point<T, dim>& p) const override {
+            float sum = 0.0f;  
+            for (int i = 0; i < dim; ++i) {
+                sum += p[i] * p[i]; 
+            }
+            return sum;
+        }
     };
 
     template <typename T = float, int dim = 2>
     class Swarm
     {
     private:
-        std::vector<Particle> particles;
-        Point<T, dim> gBest;
-        float gBest_value;
+        std::vector<std::unique_ptr<Particle<T, dim>>> particles; //stores both normal and chaotic particles
+        const Function<T, dim>& fitness_function;
+        Point<T, dim> global_best;
+        float global_best_value;
         Point<T, dim> a;
         Point<T, dim> b;
         int current_iteration;
         int max_iterations;
 
     public:
-        void findGBest();
+        Swarm(const Function<T, dim>& func) : fitness_function(func) {}
+
+        void findGlobalBest();
         void updateEveryone();
     };
 
@@ -38,10 +55,10 @@ namespace Swarm
     {
     protected:
         Point<T, dim> position;
-        Point<T, dim> lBest;
+        Point<T, dim> personal_best;
 
     public:
-        void updatePosition();
+        virtual void updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations) = 0;
         virtual ~Particle() {}
     };
 
@@ -52,20 +69,54 @@ namespace Swarm
         Point<T, dim> speed;
         float c1 = 2.5f;
         float c2 = 2.5f;
-        // float w; dynamic inertia weight
-        float lBest_value;
+        float personal_best_value; // solo la normal particle
 
         void updateSpeed(const Point<T, dim>& gBest, int it, int maxiter);
 
     public:
-        void updatelBest(int it);
+        virtual void updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations);
+        void updatePersonalBest(const Function<T, dim>& func, int it);
     };
 
-    template <typename T = float,int dim = 2>
+    template <typename T = float, int dim = 2>
     class ChaoticParticle : public Particle<T, dim>
     {
-        const ChaosMap &chaosMap;
+    private:
+        const ChaosMap<T, float, dim>& chaosMap;
+    public:
+        ChaoticParticle(const ChaosMap<T, float, dim>& map) : chaosMap(map) {}
+    
+        void updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations) override;
     };
+
+    //Class functions
+    template <typename T, int dim>
+    void Swarm<T, dim>::findGlobalBest()
+    {
+        for (const auto& particle : particles)
+        {
+            float fitness = fitness_function.evaluate(particle->position);
+            if (fitness < global_best_value)
+            {
+                global_best_value = fitness;
+                global_best = particle->position;
+            }
+        }
+    }
+
+    template <typename T, int dim>
+    void Swarm<T, dim>::updateEveryone(){
+        for(auto& particle : particles){
+            particle->updatePosition(this->global_best, this->a, this->b, current_iteration,max_iterations);
+            // allora praticamente faccio tutto in update position
+            // chaotic semplicemente calcola la posizione
+            // normal calcola la velocità, update posizione, e update personal best
+            // non è importante il personal best per il chaotic
+            // dio caro ho sonno
+            particle->updatePersonalBest(fitness_function, current_iteration); // da sistemare per chaotic
+        }
+        ++current_iteration;
+    }
 
     template <typename T, int dim>
     void NormalParticle<T, dim>::updateSpeed(const Point<T, dim>& global_best, int it, int maxiter)
@@ -89,60 +140,32 @@ namespace Swarm
     }
 
     template <typename T, int dim>
-    void Swarm<T, dim>::findGbest()
+    void NormalParticle<T, dim>::updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations)
     {
-        for (const auto& particle : particles)
-        {
-            float fitness = /* evaluate fitness of particle.position */;
-            if (fitness < gBest_value)
-            {
-                gBest_value = fitness;
-                gBest = particle.position;
+        updateSpeed(global_best, current_iteration, max_iterations);
+        this->position = this->position + this->speed; // clamp strategy is needed
+    }
+
+    template <typename T, int dim>
+    void NormalParticle<T, dim>::updatePersonalBest(const Function<T, dim>& func, int it)
+    {
+        if(it==0){
+            this->personal_best_value = func.evaluate(this->position);
+            this->personal_best = this->position;
+        }
+        else{
+            float current_value = func.evaluate(this->position);
+            if(current_value < this->personal_best_value){
+                this->personal_best_value = current_value;
+                this->personal_best = this->position;
             }
         }
     }
 
     template <typename T, int dim>
-    void Swarm<T, dim>::updateEveryone(){
-        for(auto& particle : particles){
-            particle.updateSpeed(this->gBest, current_iteration, max_iterations);
-            particle.updatePosition();
-            particle.updatelBest(); //maybe is useful to update lBest directly in the particle updatePosition method
-        }
-    }
-
-    template <typename T = float, int dim = 2>
-
-
-    class SphereFunction : public Function<T, dim>
+    void ChaoticParticle<T, dim>::updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations)
     {
-    public:
-        float evaluate(const Point<T, dim>& p) const override {
-            float sum = 0.0f;  
-            for (int i = 0; i < dim; ++i) {
-                sum += p[i] * p[i]; 
-            }
-            return sum;
-        }
-    };
-
-template <typename T, int dim>
-    void NormalParticle<T, dim>::updatelBest(int it)
-    {
-        if(it==0){
-            this->lBest_value = Function::evaluate(this->position);
-            this->lBest=this->position;
-        }
-        else{
-            if(Function::evaluate(Point<)>lBest_value){
-                this->lBest_value=Function::evaluate(this->position);
-                this->lBest=this->position;
-            }
-        }
-
+        this->position = chaosMap.getPoint(this->position, a, b);
     }
-
-
-    
 }
 #endif
