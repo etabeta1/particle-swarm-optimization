@@ -20,6 +20,11 @@ namespace Swarm
         a * b;
     };
 
+    template<typename T, typename U>
+    concept Divisible = requires(T a, U b) {
+        a / b;
+    };
+
     template<typename T, typename U, typename V>
     concept TriComparable = requires(T a, U b, V c) {
         a <= b <= c;
@@ -70,6 +75,12 @@ namespace Swarm
 
         template<typename U> requires Multipliable<T, U>
         Point<T, dim> operator*(Point<U, dim>& other) const {}
+
+        template<typename U> requires Divisible<T, U>
+        Point<T, dim> operator/(Point<U, dim>& other) const {}
+
+        template<typename U> requires Divisible<T, U>
+        Point<T, dim> operator/(U other) const {}
 
         T& operator[](size_t index) const {}
 
