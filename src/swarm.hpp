@@ -58,7 +58,7 @@ namespace Swarm
         void updateSpeed(const Point<T, dim>& gBest, int it, int maxiter);
 
     public:
-        void updatelBest();
+        void updatelBest(int it);
     };
 
     template <typename T = float,int dim = 2>
@@ -125,6 +125,23 @@ namespace Swarm
             return sum;
         }
     };
+
+template <typename T, int dim>
+    void NormalParticle<T, dim>::updatelBest(int it)
+    {
+        if(it==0){
+            this->lBest_value = Function::evaluate(this->position);
+            this->lBest=this->position;
+        }
+        else{
+            if(Function::evaluate(Point<)>lBest_value){
+                this->lBest_value=Function::evaluate(this->position);
+                this->lBest=this->position;
+            }
+        }
+
+    }
+
 
     
 }
