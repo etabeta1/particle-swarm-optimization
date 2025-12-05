@@ -4,6 +4,7 @@
 #include <vector>
 #include <functional>
 #include <ostream>
+#include <cmath>
 
 namespace Swarm
 {
@@ -148,6 +149,21 @@ namespace Swarm
         {
             return Point<T, dim>([this, &a, &b](size_t index)
                                  { return std::max(a[index], std::min(coordinates[index], b[index])); });
+        }
+
+        // Returns a new `Point` whose coordinates are obtained through the elementwise application of `std::cos`.
+        Point<T, dim> cos() const
+        {
+            return Point<T, dim>([this](size_t index)
+                                 { return std::cos(coordinates[index]); });
+        }
+
+
+        // Returns a new `Point` whose coordinates are obtained through the elementwise application of `std::acos`.
+        Point<T, dim> arccos() const
+        {
+            return Point<T, dim>([this](size_t index)
+                                 { return std::acos(coordinates[index]); });
         }
 
         // Returns a copy of the coordinate at the selected index.
