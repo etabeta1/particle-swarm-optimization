@@ -4,6 +4,7 @@
 #include "chaosmap.hpp"
 #include "../lib/funcs.hpp"
 
+#include <cmath>
 #include <vector>
 
 namespace Swarm
@@ -29,6 +30,51 @@ namespace Swarm
             return sum;
         }
     };
+
+    template <typename T = float, int dim = 2>
+    class EllipsoidFunction : public Function<T, dim>
+    {
+    public:
+        float evaluate(const Point<T, dim>& p) const override {
+            float sum = 0.0f;  
+            for (int i = 0; i < dim; ++i) {
+                sum += i*p[i] * p[i]; 
+            }
+            return sum;
+        }
+    };
+
+    template <typename T = float, int dim = 2>
+    class QuinticFunction : public Function<T, dim>
+    {
+    public:
+        float evaluate(const Point<T, dim>& p) const override {
+            float sum = 0.0f;  
+            for (int i = 0; i < dim; ++i) {
+                sum += abs(pow(p[i],5) - 3*pow(p[i],4) + 4*pow(p[i],3) + 2*pow(p[i],2) -10*p[i] -4); 
+            }
+            return sum;
+        }
+    };
+
+    template <typename T = float, int dim = 2>
+    class DropwaveFunction : public Function<T, dim>
+    {
+    public:
+        float evaluate(const Point<T, dim>& p) const override {
+            float sum = 0.0f;
+            float part_sum = 0.0f;
+            for (int i = 0; i < dim; ++i) {
+                part_sum = p[i]*p[i];
+            }
+            sum = 1 - (1 + cos(12 * sqrt(part_sum))) / (0.5 * part_sum + 2);
+            return sum;
+        }
+    };
+
+    
+
+
 
     template <typename T = float, int dim = 2>
     class Swarm
