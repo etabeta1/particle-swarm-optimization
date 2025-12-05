@@ -121,8 +121,9 @@ namespace Swarm
         Point<T, dim> b;
         int current_iteration;
         int max_iterations;
-    //protected:
-        // float global
+    //public:
+        //Point<T, dim> global_best;
+        //float global_best_value;
 
     public:
         Swarm(const Function<T, dim>& func) : fitness_function(func) {}
