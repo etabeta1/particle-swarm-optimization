@@ -7,13 +7,13 @@
 
 namespace Swarm
 {
-    template <typename T = float,int dim = 2>
+    template <typename T = float, int dim = 2>
     class ChaosMap
     {
     private:
         Point<T, dim> a_min;
         Point<T, dim> b_max;
-        std::function<Point<T,dim>(Point<T, dim> &)> map;
+        std::function<Point<T, dim>(Point<T, dim> &)> map;
         inline Point<T, dim> mapBetweenDomains(const Point<T, dim> &point, const Point<T, dim> &first_range_start, const Point<T, dim> &first_range_end, const Point<T, dim> &min_range, const Point<T, dim> &max_range)
         {
             // codice per trasformare le coordinate
@@ -26,13 +26,8 @@ namespace Swarm
         };
 
     public:
-        ChaosMap(std::function<Point<T,dim>(Point<T, dim> &)> lambda_fun, Point<T, dim> min, Point<T, dim> max)
-        {
-            map = lambda_fun;
-            a_min = min;
-            b_max = max;
-        };
-        inline Point<T, dim> toLocalDomain(const Point<T, dim> &point,const Point<T,dim > &min_range, const Point<T, dim> &max_range)
+        ChaosMap(const std::function<Point<T, dim>(Point<T, dim> &)> &lambda_fun, const Point<T, dim> &min, const Point<T, dim> &max) : map(lambda_fun), a_min(min), b_max(max) {};
+        inline Point<T, dim> toLocalDomain(const Point<T, dim> &point, const Point<T, dim> &min_range, const Point<T, dim> &max_range)
         {
             return mapBetweenDomains(point, min_range, max_range, a_min, b_max);
         };
