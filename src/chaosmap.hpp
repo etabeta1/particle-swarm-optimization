@@ -7,7 +7,7 @@
 
 namespace Swarm
 {
-    template <typename T = float, typename U = float, int dim = 2>
+    template <typename T = float,int dim = 2>
     class ChaosMap
     {
     private:
@@ -26,13 +26,13 @@ namespace Swarm
         };
 
     public:
-        ChaosMap(std::function<U(Point<T, dim> &)> lambda_fun, Point<T, dim> min, Point<T, dim> max)
+        ChaosMap(std::function<Point<T,dim>(Point<T, dim> &)> lambda_fun, Point<T, dim> min, Point<T, dim> max)
         {
             map = lambda_fun;
             a_min = min;
             b_max = max;
         };
-        inline Point<T, dim> toLocalDomain(const Point<T, dim> &point, dim > &min_range, const Point<T, dim> &max_range)
+        inline Point<T, dim> toLocalDomain(const Point<T, dim> &point,const Point<T,dim > &min_range, const Point<T, dim> &max_range)
         {
             return mapBetweenDomains(point, min_range, max_range, a_min, b_max);
         };
