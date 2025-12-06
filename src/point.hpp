@@ -38,6 +38,8 @@ namespace Swarm
     // - `T` is the type used to store the coordinated (defaults to `float`).
     // - `dim` is the number of dimensions for the vector (defaults to 2).
     template <typename T = float, int dim = 2>
+        requires Addable<T, T> ||
+                 Multipliable<T, T>
     class Point
     {
     public:
@@ -196,6 +198,31 @@ namespace Swarm
             }
 
             return accum * remainder;
+        }
+
+        T norm1() const
+        {
+            T sum = 0;
+            for (T c : coordinates)
+            {
+                sum += c;
+            }
+            return sum;
+        }
+
+        T squareNorm2() const
+        {
+            T sum = 0;
+            for (T c : coordinates)
+            {
+                sum += c * c;
+            }
+            return sum;
+        }
+
+        T norm2() const
+        {
+            return std::sqrt(squareNorm2());
         }
 
         // Returns a copy of the coordinate at the selected index.
