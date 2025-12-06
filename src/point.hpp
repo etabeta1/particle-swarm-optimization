@@ -225,6 +225,12 @@ namespace Swarm
             return std::sqrt(squareNorm2());
         }
 
+        Point<T, dim> abs() const
+        {
+            return Point<T, dim>([this](size_t index)
+                                 { return std::abs(coordinates[index]); });
+        }
+
         // Returns a copy of the coordinate at the selected index.
         T operator[](size_t index) const
         {
