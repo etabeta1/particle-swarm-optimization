@@ -121,15 +121,20 @@ namespace Swarm
         Point<T, dim> b;
         int current_iteration;
         int max_iterations;
-    //public:
-        //Point<T, dim> global_best;
-        //float global_best_value;
 
     public:
         Swarm(const Function<T, dim>& func) : fitness_function(func) {}
 
         void findGlobalBest();
         void updateEveryone();
+
+        Point<T, dim> getGlobalBest() const {
+            return global_best;
+        }
+
+        float getGlobalBestValue() const {
+            return global_best_value;
+        }
     };
 
     template <typename T = float, int dim = 2>
