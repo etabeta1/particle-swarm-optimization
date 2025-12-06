@@ -152,13 +152,15 @@ namespace Swarm
         }
 
         // Returns a new `Point` whose coordinates are obtained through the elementwise application of `std::sin`.
-        Point<T, dim> sin() const {
+        Point<T, dim> sin() const
+        {
             return Point<T, dim>([this](size_t index)
                                  { return std::sin(coordinates[index]); });
         }
 
         // Returns a new `Point` whose coordinates are obtained through the elementwise application of `std::asin`.
-        Point<T, dim> arcsin() const {
+        Point<T, dim> arcsin() const
+        {
             return Point<T, dim>([this](size_t index)
                                  { return std::asin(coordinates[index]); });
         }
@@ -175,6 +177,25 @@ namespace Swarm
         {
             return Point<T, dim>([this](size_t index)
                                  { return std::acos(coordinates[index]); });
+        }
+
+        Point<T, dim> pow(int exponent) const
+        {
+            Point<T, dim> remainder(1);
+            Point<T, dim> accum(*this);
+
+            while (exponent > 1)
+            {
+                if (exponent & 1)
+                {
+                    remainder = remainder * accum;
+                }
+
+                accum = accum * accum;
+                exponent >>= 1;
+            }
+
+            return accum * remainder;
         }
 
         // Returns a copy of the coordinate at the selected index.
