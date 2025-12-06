@@ -151,13 +151,24 @@ namespace Swarm
                                  { return std::max(a[index], std::min(coordinates[index], b[index])); });
         }
 
+        // Returns a new `Point` whose coordinates are obtained through the elementwise application of `std::sin`.
+        Point<T, dim> sin() const {
+            return Point<T, dim>([this](size_t index)
+                                 { return std::sin(coordinates[index]); });
+        }
+
+        // Returns a new `Point` whose coordinates are obtained through the elementwise application of `std::asin`.
+        Point<T, dim> arcsin() const {
+            return Point<T, dim>([this](size_t index)
+                                 { return std::asin(coordinates[index]); });
+        }
+
         // Returns a new `Point` whose coordinates are obtained through the elementwise application of `std::cos`.
         Point<T, dim> cos() const
         {
             return Point<T, dim>([this](size_t index)
                                  { return std::cos(coordinates[index]); });
         }
-
 
         // Returns a new `Point` whose coordinates are obtained through the elementwise application of `std::acos`.
         Point<T, dim> arccos() const
