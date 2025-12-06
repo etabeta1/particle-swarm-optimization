@@ -6,33 +6,10 @@
 #include <ostream>
 #include <cmath>
 
+#include "utils.hpp"
+
 namespace Swarm
 {
-    template <typename T, typename U>
-    concept Addable = requires(T a, U b) {
-        a + b;
-    };
-
-    template <typename T, typename U>
-    concept Subtractable = requires(T a, U b) {
-        a - b;
-    };
-
-    template <typename T, typename U>
-    concept Multipliable = requires(T a, U b) {
-        a * b;
-    };
-
-    template <typename T, typename U>
-    concept Divisible = requires(T a, U b) {
-        a / b;
-    };
-
-    template <typename T, typename U, typename V>
-    concept TriComparable = requires(T a, U b, V c) {
-        a <= b <= c;
-    };
-
     // Representation of an n-dimensional vector.
     //
     // - `T` is the type used to store the coordinated (defaults to `float`).
@@ -181,6 +158,7 @@ namespace Swarm
                                  { return std::acos(coordinates[index]); });
         }
 
+        // Returns a new `Point` whose coordinates are obtained through the elementwise exponentiation to a positive integer.
         Point<T, dim> pow(int exponent) const
         {
             Point<T, dim> remainder(1);
@@ -200,6 +178,7 @@ namespace Swarm
             return accum * remainder;
         }
 
+        // Returns the 1-norm of the point.
         T norm1() const
         {
             T sum = 0;
@@ -210,6 +189,7 @@ namespace Swarm
             return sum;
         }
 
+        // Returns the square 2-norm of the point.
         T squareNorm2() const
         {
             T sum = 0;
@@ -220,11 +200,13 @@ namespace Swarm
             return sum;
         }
 
+        // Returns the 2-norm of the point.
         T norm2() const
         {
             return std::sqrt(squareNorm2());
         }
 
+        // Returns a new `Point` whose coordinates are obtained through the elementwise application of `std::abs`.
         Point<T, dim> abs() const
         {
             return Point<T, dim>([this](size_t index)
