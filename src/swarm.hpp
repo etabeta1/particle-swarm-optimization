@@ -161,7 +161,7 @@ namespace Swarm
         void updateSpeed(const Point<T, dim>& global_best, int current_itertion, int max_iterations);
 
     public:
-        virtual void updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations);
+        void updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations) override;
         void updatePersonalBest(const Function<T, dim>& func, int current_iteration);
     };
 
@@ -206,7 +206,7 @@ namespace Swarm
     }
 
     template <typename T, int dim>
-    void NormalParticle<T, dim>::updateSpeed(const Point<T, dim>& global_best, int current_iteration, int max_iterations)
+    void NormalParticle<T, dim>::updateSpeed(const Swarm& swarm, int current_iteration, int max_iterations)
     {
         // CHOPSO velocity update formula
         // v(t+1) = w*v(t) + k1*(pBest - x(t)) + k2*(gBest - x(t))
@@ -221,15 +221,15 @@ namespace Swarm
 
         Point<T, dim> inertia = speed * w;
         Point<T, dim> cognitive = (this->personal_best - this->position) * k1;
-        Point<T, dim> social = (global_best - this->position) * k2;
+        Point<T, dim> social = (swarm.getGlobalBest() - this->position) * k2;
 
         speed = inertia + cognitive + social;
     }
 
     template <typename T, int dim>
-    void NormalParticle<T, dim>::updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations)
+    void NormalParticle<T, dim>::updatePosition(const Swarm& swarm,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations)
     {
-        updateSpeed(global_best, current_iteration, max_iterations);
+        updateSpeed(swarm, current_iteration, max_iterations);
         this->position = this->position + this->speed; // clamp strategy is needed
     }
 
@@ -250,7 +250,7 @@ namespace Swarm
     }
 
     template <typename T, int dim>
-    void ChaoticParticle<T, dim>::updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations)
+    void ChaoticParticle<T, dim>::updatePosition(const Swarm& swarm,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations)
     {
         this->position = chaosMap.getPoint(this->position, a, b);
     }
