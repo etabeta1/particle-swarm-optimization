@@ -153,11 +153,11 @@ namespace Swarm
         float c2 = 2.5f;
         float personal_best_value; // solo la normal particle
 
-        void updateSpeed(const Point<T, dim>& global_best, int current_itertions, int max_iterations);
+        void updateSpeed(const Point<T, dim>& global_best, int current_itertion, int max_iterations);
 
     public:
         virtual void updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations);
-        void updatePersonalBest(const Function<T, dim>& func, int current_iterations);
+        void updatePersonalBest(const Function<T, dim>& func, int current_iteration);
     };
 
     template <typename T = float, int dim = 2>
@@ -189,7 +189,7 @@ namespace Swarm
     template <typename T, int dim>
     void Swarm<T, dim>::updateEveryone(){
         for(auto& particle : particles){
-            particle->updatePosition(this->global_best, this->a, this->b, current_iteration,max_iterations);
+            particle->updatePosition(this->global_best, this->a, this->b, current_iteration, max_iterations);
             // allora praticamente faccio tutto in update position
             // chaotic semplicemente calcola la posizione
             // normal calcola la velocità, update posizione, e update personal best
@@ -201,7 +201,7 @@ namespace Swarm
     }
 
     template <typename T, int dim>
-    void NormalParticle<T, dim>::updateSpeed(const Point<T, dim>& global_best, int current_iterations, int max_iterations)
+    void NormalParticle<T, dim>::updateSpeed(const Point<T, dim>& global_best, int current_iteration, int max_iterations)
     {
         // CHOPSO velocity update formula
         // v(t+1) = w*v(t) + k1*(pBest - x(t)) + k2*(gBest - x(t))
@@ -209,7 +209,7 @@ namespace Swarm
         // k2 = rand[0,1] * 2.5
         // w = 0.9 - (0.5 * iteration) / maxIterations) is the dynamic inertia weight
 
-        float w = 0.9f - ((0.5f * static_cast<float>(current_iterations)) / static_cast<float>(max_iterations));
+        float w = 0.9f - ((0.5f * static_cast<float>(current_iteration)) / static_cast<float>(max_iterations));
 
         float k1 = Funcs::randFloat(0.0f, 1.0f) * c1;
         float k2 = Funcs::randFloat(0.0f, 1.0f) * c2;
@@ -229,9 +229,9 @@ namespace Swarm
     }
 
     template <typename T, int dim>
-    void NormalParticle<T, dim>::updatePersonalBest(const Function<T, dim>& func, int current_iterations)
+    void NormalParticle<T, dim>::updatePersonalBest(const Function<T, dim>& func, int current_iteration)
     {
-        if(current_iterations==0){
+        if(current_iteration==0){
             this->personal_best_value = func.evaluate(this->position);
             this->personal_best = this->position;
         }
