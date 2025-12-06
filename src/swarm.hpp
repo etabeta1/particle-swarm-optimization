@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <vector>
+#include <memory>
 
 namespace Swarm
 {
@@ -26,6 +27,10 @@ namespace Swarm
 
     public:
         Swarm(const Function<T, dim>& func) : fitness_function(func) {}
+
+        void addParticle(std::unique_ptr<Particle<T, dim>> p) {
+            particles.emplace_back(std::move(p));
+    }
 
         void findGlobalBest();
         void updateEveryone();
