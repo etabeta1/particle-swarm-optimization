@@ -11,7 +11,7 @@
 
 namespace Swarm
 {
-    //Class Declaration
+    //Class Declarations
     template <typename T = float, int dim = 2>
     class Swarm
     {
@@ -72,6 +72,10 @@ namespace Swarm
         void updateSpeed(const Point<T, dim>& global_best, int current_iteration, int max_iterations);
 
     public:
+        NormalParticle(const Point<T, dim>& position_, const Point<T, dim>& speed_, const Function<T, dim>& func) : speed(speed_), personal_best(position_), personal_best_value(func.evaluate(position_)) {
+            this->position = position_;
+        } 
+
         void updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations) override;
         void updatePersonalBest(const Function<T, dim>& func, int current_iteration);
     };
@@ -151,16 +155,10 @@ namespace Swarm
     template <typename T, int dim>
     void NormalParticle<T, dim>::updatePersonalBest(const Function<T, dim>& func, int current_iteration)
     {
-        if(current_iteration==0){
-            this->personal_best_value = func.evaluate(this->position);
+        float current_value = func.evaluate(this->position);
+        if(current_value < this->personal_best_value){
+            this->personal_best_value = current_value;
             this->personal_best = this->position;
-        }
-        else{
-            float current_value = func.evaluate(this->position);
-            if(current_value < this->personal_best_value){
-                this->personal_best_value = current_value;
-                this->personal_best = this->position;
-            }
         }
     }
 
