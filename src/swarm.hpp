@@ -12,6 +12,15 @@
 namespace Swarm
 {
     //Class Declarations
+    /*
+        Definition of a swarm optimization algorithm.
+        - `T` is the type used to store the coordinates (defaults to `float`)
+        - `dim` is the number of dimensions for the vector (defaults to 2)
+
+        - addParticle: adds a particle to the swarm
+        - findGlobalBest: finds the best position among all particles
+        - updateEveryone: updates the position of all particles in the swarm
+    */
     template <typename T = float, int dim = 2>
     class Swarm
     {
@@ -47,6 +56,13 @@ namespace Swarm
         }
     };
 
+    /*
+        Definition of a generic particle in the swarm.
+        - `T` is the type used to store the coordinates (defaults to `float`)
+        - `dim` is the number of dimensions for the vector (defaults to 2)
+
+        - updatePosition: updates the position of the particle
+    */
     template <typename T = float, int dim = 2>
     class Particle
     {
@@ -57,6 +73,23 @@ namespace Swarm
         virtual ~Particle() {}
     };
 
+    /*
+        Definition of the first kind of particle
+        The normal particle follows the PSO logic
+
+        - `T` is the type used to store the coordinates (defaults to `float`)
+        - `dim` is the number of dimensions for the vector (defaults to 2)
+
+        the constructor initializes the position, speed, and personal best
+        constants c1 and c2 control the influence of personal and global best positions and are fixed based on the CHOPSO implementation
+
+        - updatePosition: updates the position of the particle
+        - updatePersonalBest: updates the personal best position and value of the particle
+        - updateSpeed: updates the speed of the particle
+
+        the last two functions are specific to the normal particle
+
+    */
     template <typename T = float, int dim = 2>
     class NormalParticle : public Particle<T, dim>
     {
@@ -67,7 +100,7 @@ namespace Swarm
         float c2 = 2.5f;
         
         Point<T, dim> personal_best;
-        float personal_best_value; // solo la normal particle
+        float personal_best_value; // only normal particle can store the personal best
 
         void updateSpeed(const Point<T, dim>& global_best, int current_iteration, int max_iterations);
 
@@ -80,6 +113,13 @@ namespace Swarm
         void updatePersonalBest(const Function<T, dim>& func, int current_iteration);
     };
 
+    /*
+        Definition of the chaotic particle
+        - `T` is the type used to store the coordinates (defaults to `float`)
+        - `dim` is the number of dimensions for the vector (defaults to 2)
+        
+        - updatePosition: updates the position of the particle based on a chaotic map
+    */
     template <typename T = float, int dim = 2>
     class ChaoticParticle : public Particle<T, dim>
     {
@@ -92,6 +132,12 @@ namespace Swarm
     };
 
     //Class functions
+    /*
+        Description of the function findGlobalBest
+        - parameters: none
+
+        the function iterates through all particles to find the one with the best fitness value
+    */
     template <typename T, int dim>
     void Swarm<T, dim>::findGlobalBest()
     {
@@ -105,7 +151,13 @@ namespace Swarm
             }
         }
     }
+    /*
+        Description of the function updateEveryone
+        - parameters: none
 
+        the function updates the position of all particles, updates the personal best for normal particles,
+        finds the global best, and increments the current iteration
+    */
     template <typename T, int dim>
     void Swarm<T, dim>::updateEveryone(){
         for(auto& particle : particles){
@@ -120,7 +172,15 @@ namespace Swarm
 
         ++current_iteration;
     }
+    /*
+        Description of the function updateSpeed
+        - parameters:
+            - global_best: the best position found by the swarm
+            - current_iteration: the current iteration of the swarm
+            - max_iterations: the maximum number of iterations for the swarm
 
+        the function updates the speed of the normal particle based on the CHOPSO velocity update formula
+    */
     template <typename T, int dim>
     void NormalParticle<T, dim>::updateSpeed(const Point<T, dim>& global_best, int current_iteration, int max_iterations)
     {
@@ -142,6 +202,17 @@ namespace Swarm
         this->speed = inertia + cognitive + social;
     }
 
+    /*
+        Description of the function updatePosition
+        - parameters:
+            - global_best: the best position found by the swarm
+            - a: the minimum boundary for the position
+            - b: the maximum boundary for the position
+            - current_iteration: the current iteration of the swarm
+            - max_iterations: the maximum number of iterations for the swarm
+
+        the function updates the position of the normal particle based on its speed and clamps it within the boundaries
+    */
     template <typename T, int dim>
     void NormalParticle<T, dim>::updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations)
     {
@@ -151,7 +222,14 @@ namespace Swarm
 
         this-> position = this->position.clamp(a,b);
     }
+    /*
+        Description of the function updatePersonalBest
+        - parameters:
+            - func: the fitness function to evaluate the particle's position
+            - current_iteration: the current iteration of the swarm
 
+        the function updates the personal best position and value of the normal particle if the current position is better
+    */
     template <typename T, int dim>
     void NormalParticle<T, dim>::updatePersonalBest(const Function<T, dim>& func, int current_iteration)
     {
@@ -161,7 +239,18 @@ namespace Swarm
             this->personal_best = this->position;
         }
     }
+    
+    /*
+        Description of the function updatePosition
+        - parameters:
+            - global_best: the best position found by the swarm
+            - a: the minimum boundary for the position
+            - b: the maximum boundary for the position
+            - current_iteration: the current iteration of the swarm
+            - max_iterations: the maximum number of iterations for the swarm
 
+        the function updates the position of the chaotic particle based on a chaotic map
+    */
     template <typename T, int dim>
     void ChaoticParticle<T, dim>::updatePosition(const Point<T, dim>& global_best,const Point<T, dim>& a, const Point<T, dim>& b,int current_iteration, int max_iterations)
     {
