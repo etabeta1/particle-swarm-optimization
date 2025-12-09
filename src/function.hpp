@@ -16,7 +16,7 @@ namespace Swarm
     class Function
     {
     public:
-        virtual float evaluate(const Point<T, dim>& p) const = 0;
+        virtual T evaluate(const Point<T, dim>& p) const = 0;
         virtual ~Function() = default;
     };
 
@@ -33,11 +33,9 @@ namespace Swarm
     class SphereFunction : public Function<T, dim>
     {
     public:
-        float evaluate(const Point<T, dim>& p) const override {
-            float sum = 0.0f;  
-            for (int i = 0; i < dim; ++i) {
-                sum += p[i] * p[i]; 
-            }
+        T evaluate(const Point<T, dim>& p) const override {
+            T sum = 0.0f;  
+            sum = p.squareNorm2();
             return sum;
         }
     };
@@ -55,10 +53,10 @@ namespace Swarm
     class EllipsoidFunction : public Function<T, dim>
     {
     public:
-        float evaluate(const Point<T, dim>& p) const override {
-            float sum = 0.0f;  
+        T evaluate(const Point<T, dim>& p) const override {
+            T sum = 0.0f;  
             for (int i = 0; i < dim; ++i) {
-                sum += i*p[i] * p[i]; 
+                sum += i* p[i] * p[i]; 
             }
             return sum;
         }
@@ -77,11 +75,9 @@ namespace Swarm
     class QuinticFunction : public Function<T, dim>
     {
     public:
-        float evaluate(const Point<T, dim>& p) const override {
-            float sum = 0.0f;  
-            for (int i = 0; i < dim; ++i) {
-                sum += abs(pow(p[i],5) - 3*pow(p[i],4) + 4*pow(p[i],3) + 2*pow(p[i],2) -10*p[i] -4); 
-            }
+        T evaluate(const Point<T, dim>& p) const override {
+            T sum = 0.0f;  
+            sum = (p.pow(5) - 3*p.pow(4) + 4*p.pow(3) + 2*p.pow(2) -10*p -4).abs().norm1();
             return sum;
         }
     };
@@ -100,12 +96,10 @@ namespace Swarm
     class DropwaveFunction : public Function<T, dim>
     {
     public:
-        float evaluate(const Point<T, dim>& p) const override {
-            float sum = 0.0f;
-            float part_sum = 0.0f;
-            for (int i = 0; i < dim; ++i) {
-                part_sum = p[i]*p[i];
-            }
+        T evaluate(const Point<T, dim>& p) const override {
+            T sum = 0.0f;
+            T part_sum = 0.0f;
+            part_sum = p.squareNorm2();
             sum = 1 - (1 + cos(12 * sqrt(part_sum))) / (0.5 * part_sum + 2);
             return sum;
         }
@@ -126,12 +120,9 @@ namespace Swarm
     class Alpine1Function : public Function<T, dim>
     {
     public:
-        float evaluate(const Point<T, dim>& p) const override {
-            float sum = 0.0f;
-
-            for (int i = 0; i < dim; ++i) {
-                sum += abs(p[i] * sin(p[i]) + 0.1 * p[i]);
-            }
+        T evaluate(const Point<T, dim>& p) const override {
+            T sum = 0.0f;
+            sum = ((p.sin())*p + p*0.1f).abs().norm1();
             return sum;
         }
     };
@@ -150,14 +141,12 @@ namespace Swarm
     class AckleyFunction : public Function<T, dim>
     {
     public:
-        float evaluate(const Point<T, dim>& p) const override {
-            float sum = 0.0f;
-            float part_sum_1 = 0.0f;
-            float part_sum_2 = 0.0f;
-            for (int i = 0; i < dim; ++i) {
-               part_sum_1 += p[i]*p[i];
-                part_sum_2 += cos(2 * M_PI * p[i]); 
-            }
+        T evaluate(const Point<T, dim>& p) const override {
+            T sum = 0.0f;
+            T part_sum_1 = 0.0f;
+            T part_sum_2 = 0.0f;
+            part_sum_1 = p.squareNorm2();
+            part_sum_2 = ((2* M_PI) * p).cos().norm1();
             sum = -20 * exp(-0.2 * sqrt(part_sum_1 / dim)) - exp(part_sum_2 / dim) + 20 + exp(1);
             return sum;
         }
