@@ -9,40 +9,47 @@
 #include "function.hpp"
 #include "utils.hpp"
 
-int main(){
-    using namespace swarm;
+int main()
+{
     int nN, nC;
-    int max_iterations=1000;
+    int max_iterations = 1000;
 
-    std::cout<<"Enter the number of normal particles."<<std::endl;
-    std::cin>> nN;
-    std::cout<<"\n"<<"Enter the number of chaotic particles."<<std::endl;
-    std::cin>>nC;
+    std::cout << "Enter the number of normal particles." << std::endl;
+    std::cin >> nN;
+    std::cout << "\n"
+              << "Enter the number of chaotic particles." << std::endl;
+    std::cin >> nC;
 
     using T = float;
-    const int dim = 2;
+    constexpr int dim = 2;
 
-    Function<T, dim> fitness;
+    std::unique_ptr<Swarm::Function<T, dim>> fitness = std::make_unique<Swarm::DropwaveFunction<T, dim>>();
 
-    ChaosMap<T, float, dim> chaosMap;
+    Swarm::Point<T, dim> a(0.f);
+    Swarm::Point<T, dim> b(1.f);
+    Swarm::MapFunction<T, dim> f = [](const Swarm::Point<T, dim> &p, int)
+    { return p; };
 
-    Swarm<T, dim> swarm(fitness);
+    Swarm::ChaosMap<T, dim> chaosMap(f, a, b);
 
-    for (int i = 0; i < nN; ++i) {
-        swarm.addParticle(std::make_unique<NormalParticle<T,dim>>());
+    Swarm::Swarm<T, dim> swarm(fitness);
+
+    for (int i = 0; i < nN; ++i)
+    {
+        swarm.addParticle(std::make_unique<Swarm::NormalParticle<T, dim>>());
     }
 
-    for (int i = 0; i < nC; ++i) {
-        swarm.addParticle(std::make_unique<ChaoticParticleParticle<T,dim>>());
+    for (int i = 0; i < nC; ++i)
+    {
+        swarm.addParticle(std::make_unique<Swarm::ChaoticParticle<T, dim>>(chaosMap));
     }
 
-    for(int i = 0; i < max_iterations; ++i){
+    for (int i = 0; i < max_iterations; ++i)
+    {
         swarm.findGlobalBest();
         swarm.updateEveryone();
     }
 
     std::cout << "Best value = " << swarm.getGlobalBestValue() << std::endl;
     std::cout << "Best position = " << swarm.getGlobalBest() << std::endl;
-
-    
 }
