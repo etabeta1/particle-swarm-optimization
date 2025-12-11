@@ -4,10 +4,19 @@
 #include <random>
 #include <chrono>
 
-inline float generate_random(float a, float b)
+template<typename T = float>
+inline T generate_random(T a, T b)
 {
     static std::mt19937 generator(std::random_device{}());
-    std::uniform_real_distribution<float> distribution(a, b);
+    
+    if constexpr (std::is_integral_v<T>) {
+        std::uniform_int_distribution<T> distribution(a, b);
+        return distribution(generator);
+    } else {
+        std::uniform_real_distribution<T> distribution(a, b);
+        return distribution(generator);
+    }
+    
     return distribution(generator);
 }
 
