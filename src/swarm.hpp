@@ -4,7 +4,7 @@
 #include "chaosmap.hpp"
 #include "function.hpp"
 #include "particle.hpp"
-#include "../lib/funcs.hpp"
+#include "funcs.hpp"
 
 #include <cmath>
 #include <vector>

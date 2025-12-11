@@ -2,7 +2,7 @@
 #define _PARTICLE_HPP_
 
 #include "point.hpp"
-#include "../lib/funcs.hpp"
+#include "funcs.hpp"
 
 namespace Swarm
 {
