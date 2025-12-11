@@ -15,10 +15,11 @@ namespace Swarm
     class ChaosMap
     {
     private:
+        MapFunction<T, dim> map;
+
         Point<T, dim> a_min;
         Point<T, dim> b_max;
 
-        MapFunction<T, dim> map;
         // Esegue la trasformazione delle coordiante del punto in un'altro dominio
         inline Point<T, dim> mapBetweenDomains(const Point<T, dim> &point, const Point<T, dim> &first_range_start, const Point<T, dim> &first_range_end, const Point<T, dim> &min_range, const Point<T, dim> &max_range) const
         {
