@@ -70,7 +70,7 @@ namespace Swarm
         // Returns a new `Point` whose coordinates are obtained through the elementwise sum of the coordinates of two `Point`s.
         template <typename U>
             requires Addable<T, U>
-        Point<T, dim> operator+(const Point<U, dim> &other) const
+        Point<std::common_type_t<T, U>, dim> operator+(const Point<U, dim> &other) const
         {
             return Point<T, dim>([this, &other](size_t index)
                                  { return coordinates[index] + other.coordinates[index]; });
@@ -79,7 +79,7 @@ namespace Swarm
         // Returns a new `Point` whose coordinates are obtained through the elementwise subtraction of the coordinates of two `Point`s.
         template <typename U>
             requires Subtractable<T, U>
-        Point<T, dim> operator-(const Point<U, dim> &other) const
+        Point<std::common_type_t<T, U>, dim> operator-(const Point<U, dim> &other) const
         {
             return Point<T, dim>([this, &other](size_t index)
                                  { return coordinates[index] - other.coordinates[index]; });
@@ -88,7 +88,7 @@ namespace Swarm
         // Returns a new `Point` whose coordinates are obtained through the elementwise product of the coordinates by a scalar.
         template <typename U>
             requires Multipliable<T, U>
-        Point<T, dim> operator*(const U &other) const
+        Point<std::common_type_t<T, U>, dim> operator*(const U &other) const
         {
             return Point<T, dim>([this, &other](size_t index)
                                  { return coordinates[index] * other; });
@@ -97,7 +97,7 @@ namespace Swarm
         // Returns a new `Point` whose coordinates are obtained through the elementwise product of the coordinates of two `Point`s.
         template <typename U>
             requires Multipliable<T, U>
-        Point<T, dim> operator*(const Point<U, dim> &other) const
+        Point<std::common_type_t<T, U>, dim> operator*(const Point<U, dim> &other) const
         {
             return Point<T, dim>([this, &other](size_t index)
                                  { return coordinates[index] * other.coordinates[index]; });
@@ -106,7 +106,7 @@ namespace Swarm
         // Returns a new `Point` whose coordinates are obtained through the elementwise division of the coordinates by a scalar.
         template <typename U>
             requires Divisible<T, U>
-        Point<T, dim> operator/(const U &other) const
+        Point<std::common_type_t<T, U>, dim> operator/(const U &other) const
         {
             return Point<T, dim>([this, &other](size_t index)
                                  { return coordinates[index] / other; });
@@ -115,7 +115,7 @@ namespace Swarm
         // Returns a new `Point` whose coordinates are obtained through the elementwise division of the coordinates of two `Point`s.
         template <typename U>
             requires Divisible<T, U>
-        Point<T, dim> operator/(const Point<U, dim> &other) const
+        Point<std::common_type_t<T, U>, dim> operator/(const Point<U, dim> &other) const
         {
             return Point<T, dim>([this, &other](size_t index)
                                  { return coordinates[index] / other.coordinates[index]; });
