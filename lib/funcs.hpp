@@ -16,8 +16,6 @@ inline T generate_random(T a, T b)
         std::uniform_real_distribution<T> distribution(a, b);
         return distribution(generator);
     }
-    
-    return distribution(generator);
 }
 
 #endif
