@@ -12,7 +12,7 @@ that mimics the movement of a flock of birds or a swarm of flies.
 
 In practice we aim to find the global best solution in this way:
 
-$global_{best} = \operatorname{argmin}_{x \in D} f(x)$, 
+$global_{best} = {argmin}_{x \in D} f(x)$, 
 where D is a subspace of $R^n$
 
 ## Goals of the project
@@ -31,14 +31,14 @@ The swarm consists of $N$ particles. At each iteration $t$, every particle $i$ u
 The update equations are defined as:
 
 **1. Velocity Update:**
-$$
+$
 v_{i}^{t+1} = \omega v_{i}^{t} + c_{1}r_{1}(p_{best_{i}}^{t}-x_{i}^{t}) + c_{2}r_{2}(g_{best}^{t}-x_{i}^{t})
-$$
+$
 
 **2. Position Update:**
-$$
+$
 x_{i}^{t+1} = x_{i}^{t} + v_{i}^{t+1}
-$$
+$
 
 **Where:**
 * $v_{i}^{t}$: Current velocity of particle $i.
