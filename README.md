@@ -118,4 +118,64 @@ Loop until Max Iterations (T) or Convergence:
 END
 ```
 
+## Implementation of the code
+
+
+The implementation is designed with a modular architecture that separates the functions and the maps from the particles.
+
+### 1.  `Point`
+
+The `Point` class represents a vector in the dominion of the problem, and it's used to represent the position of the particles.
+This class exploits C++20 concepts (`Addable`, `Multipliable`, `TriComparable`) to ensure type safety for template arguments.
+
+* **Vector Algebra:** It supports element-wise arithmetic operations (`+`, `-`, `*`, `/`) and mathematical transformations (`sin`, `cos`, `abs`, `pow`).
+* **Norms:** Includes methods for calculating the 1-norm, 2-norm, and squared 2-norm.
+* **Clamping:** Provides a `clamp()` method to constrain coordinates within a cube (defined by points `a` and `b`).
+
+### 2. The Particle System
+
+Polymorphism is exploited to manage the two different types of particles. The base `Particle` abstract class manages the `position`, `personal_best` coordinates, and the `personal_best_value`.
+
+#### `NormalParticle` (Standard PSO)
+This class implements standard Particle Swarm Optimization physics.
+* **Inertia:** Uses a dynamic inertia weight $w$ that decreases linearly from 0.9 to 0.4 over the course of the iterations.
+* **Coefficients:** Acceleration coefficients $c_1$ and $c_2$ are fixed at 2.5.
+* **Update Logic:** The velocity is updated using the CHOPSO formula:
+  $v(t+1) = w \cdot v(t) + k_1(p_{best} - x(t)) + k_2(g_{best} - x(t))$
+
+#### `ChaoticParticle`
+This class implement the chaotic version of the particle.
+* **Update of the position:** Instead of calculating velocity, it updates its position by passing its current coordinates through a `ChaosMap`.
+
+### 3. Chaos Mapping: `ChaosMap`
+
+The `ChaosMap` class handles the mathematical transformations required for `ChaoticParticle` instances.
+
+* **Domain Transformation:** It automatically maps coordinates between the **Global Domain** (the search space boundaries) and the **Local Domain** (the mathematical range required by the specific chaotic map).
+* **Generator:** It accepts a `MapFunction` (std::function) to define the specific chaotic equation used for position generation.
+
+### 4. Controller: `Swarm`
+
+The `Swarm` class acts as the controller class.
+
+* **Particles:** Keep track of all the particles (chaotic or normal) using a vector.
+* **Global attributes:** Tracks the `global_best` position and value across the entire population.
+* **Execution Cycle:** The `updateEveryone()` method:
+    1. Triggers position updates for all particles.
+    2. Updates personal bests.
+    3. Recalculates the global best.
+
+### 5. Objective Functions
+
+It's defined a generic `Function` interface.
+The actual implemented benchmark functions, which inherits from the `Function` interface are the following:
+
+* `SphereFunction`
+* `EllipsoidFunction`
+* `QuinticFunction`
+* `DropwaveFunction`
+* `Alpine1Function`
+* `AckleyFunction`
+
+
 
