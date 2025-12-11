@@ -20,7 +20,7 @@ where D is a subspace of $R^n$
 * Test the code on a set of hard minimization problems.
 * Parallelize the code using OpenMP or MPI.
 
-## The Algorithm
+## The Standard Algorithm
 PSO optimizes a problem by iteratively improving a candidate solution with regard to a given measure of quality.
 
 ### Mathematical Formulation
@@ -68,6 +68,54 @@ Loop until Max Iterations (T) or Convergence:
     // Evaluation
     If f(x_i) < f(p_best_i):
       p_best_i = x_i
-      If f(p_best_i) < f(g_best):
-        g_best = p_best_i
+    If f(p_best_i) < f(g_best):
+      g_best = p_best_i
 END
+```
+
+## Chaotic Particle Swarm Variant
+
+### Overview
+This project explores a variant of the standard PSO called **Chaotic Particle Swarm Optimization**. 
+
+In this algorithm, we introduce, along with standard particles, chaotic particles which move in the dominion of the problem using chaotic maps, which allow to better explore all the dominion of the problem. Chaos is characterized by two distinctive properties: **non-repeatability** and **periodicity**.
+
+
+### Main Differences: Standard vs. Chaotic
+
+The key differences and improvements of the Chaotic variant over the Standard PSO are:
+
+| Feature | Standard PSO | Chaotic PSO |
+| :--- | :--- | :--- |
+| **Particles** | Just normal particles. | Chaotic and normal particles. |
+| **Search Speed** | Slower general search speed compared to chaotic methods. | Has the ability to perform general searches at **higher speeds**. |
+| **Convergence** | Often haunted by **fruitless early convergence**. | The introduction of chaotic particles **avoid early convergence** through adaptability and ideal global search capabilities. |
+
+### Modifications to the standard Algorithm
+Compared to the standard algorithm, in the chaotic variant we have to distinguish between normal and chaotic particles, this is done in practice using two different sub-classes but we could modify the pseudocode in this way:
+
+```
+Loop until Max Iterations (T) or Convergence:
+  For each particle i in N:
+   if (i is normal)
+   {
+    // Update Velocity
+    v_i = w*v_i + c1*r1*(p_best_i - x_i) + c2*r2*(g_best - x_i)
+    
+    // Update Position
+    x_i = x_i + v_i
+   }
+   else
+   {
+    x_i = chaosmap(x_i)
+   }
+    
+    // Evaluation
+    If f(x_i) < f(p_best_i):
+      p_best_i = x_i
+    If f(p_best_i) < f(g_best):
+      g_best = p_best_i
+END
+```
+
+
