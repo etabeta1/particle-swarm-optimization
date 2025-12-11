@@ -43,12 +43,13 @@ namespace Swarm
         int max_iterations;
 
     public:
-        Swarm(std::unique_ptr<Function<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b) : particles(0), fitness_function(std::move(p)), global_best(0.f), global_best_value(std::numeric_limits<T>::infinity()), a(_a), b(_b), current_iteration(0), max_iterations(0) {}
+        Swarm(std::unique_ptr<Function<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b, int _max_iterations) : particles(0), fitness_function(std::move(p)), global_best(0.f), global_best_value(std::numeric_limits<T>::infinity()), a(_a), b(_b), current_iteration(0), max_iterations(_max_iterations) {}
 
         void addParticle(std::unique_ptr<Particle<T, dim>> p)
         {
             p->reinit(Point<T, dim>([this](size_t i)
-                                    { return generate_random(a[i], b[i]); }));
+                                    { return generate_random(a[i], b[i]); }),
+                      *fitness_function);
             particles.emplace_back(std::move(p));
         }
 
@@ -62,7 +63,8 @@ namespace Swarm
         {
             for (const auto &particle : particles)
             {
-                float fitness = fitness_function->evaluate(particle->getPosition());
+                // float fitness = fitness_function->evaluate(particle->getPosition());
+                float fitness = particle->getPersonalBestValue();
                 if (fitness < global_best_value)
                 {
                     global_best_value = fitness;
@@ -82,9 +84,11 @@ namespace Swarm
         {
             for (auto &particle : particles)
             {
-                std::cout << particle->getPosition() << std::endl;
+                std::cout << "Pre: " << particle->getPosition() << std::endl;
                 particle->updatePosition(this->global_best, this->a, this->b, current_iteration, max_iterations);
+                std::cout << "Mid: " << particle->getPosition() << std::endl;
                 particle->updatePersonalBest(*fitness_function);
+                std::cout << "Post: " << particle->getPosition() << std::endl;
             }
 
             findGlobalBest();

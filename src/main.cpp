@@ -12,7 +12,7 @@
 int main()
 {
     int nN, nC;
-    int max_iterations = 1000;
+    int max_iterations = 7;
 
     std::cout << "Enter the number of normal particles." << std::endl;
     std::cin >> nN;
@@ -25,14 +25,17 @@ int main()
 
     std::unique_ptr<Swarm::Function<T, dim>> fitness = std::make_unique<Swarm::DropwaveFunction<T, dim>>();
 
-    Swarm::Point<T, dim> a(0.f);
-    Swarm::Point<T, dim> b(1.f);
-    Swarm::MapFunction<T, dim> f = [](const Swarm::Point<T, dim> &p, int)
-    { return p; };
+    Swarm::Point<T, dim> map_a(-1.f);
+    Swarm::Point<T, dim> map_b(1.f);
+    Swarm::MapFunction<T, dim> f = [](const Swarm::Point<T, dim> &p, int k)
+    { return (p.arccos() * k).cos(); };
 
-    Swarm::ChaosMap<T, dim> chaosMap(f, a, b);
+    Swarm::Point<T, dim> a(-1000.f);
+    Swarm::Point<T, dim> b(+1000.f);
 
-    Swarm::Swarm<T, dim> swarm(fitness, a, b);
+    Swarm::ChaosMap<T, dim> chaosMap(f, map_a, map_b);
+
+    Swarm::Swarm<T, dim> swarm(fitness, a, b, max_iterations);
 
     for (int i = 0; i < nN; ++i)
     {
@@ -46,8 +49,10 @@ int main()
 
     for (int i = 0; i < max_iterations; ++i)
     {
-        swarm.findGlobalBest();
+        std::cout << "Iteration: " << i << std::endl;
         swarm.updateEveryone();
+        std::cout << "Best value = " << swarm.getGlobalBestValue() << std::endl;
+        std::cout << "Best position = " << swarm.getGlobalBest() << std::endl;
     }
 
     std::cout << "Best value = " << swarm.getGlobalBestValue() << std::endl;

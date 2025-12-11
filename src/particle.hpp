@@ -57,6 +57,16 @@ namespace Swarm
         {
             return position;
         }
+
+        Point<T, dim> &getPersonalBest()
+        {
+            return personal_best;
+        }
+
+        float getPersonalBestValue()
+        {
+            return personal_best_value;
+        }
     };
 
     /*
@@ -102,7 +112,7 @@ namespace Swarm
             // k2 = rand[0,1] * 2.5
             // w = 0.9 - (0.5 * iteration) / maxIterations) is the dynamic inertia weight
 
-            float w = 0.9f - ((0.5f * static_cast<float>(current_iteration)) / static_cast<float>(max_iterations));
+            float w = 0.9f - (0.5f * static_cast<float>(current_iteration) / static_cast<float>(max_iterations));
 
             float k1 = generate_random(0.0f, 1.0f) * c1;
             float k2 = generate_random(0.0f, 1.0f) * c2;
@@ -132,9 +142,7 @@ namespace Swarm
         {
             updateSpeed(global_best, current_iteration, max_iterations);
 
-            this->position = this->position + this->speed;
-
-            this->position = this->position.clamp(a, b);
+            this->position = (this->position + this->speed).clamp(a, b);
         }
     };
 
