@@ -8,6 +8,7 @@
 #include <cmath>
 #include <vector>
 #include <memory>
+#include <limits>
 
 namespace Swarm
 {
@@ -41,12 +42,12 @@ namespace Swarm
         int max_iterations;
 
     public:
-        Swarm(std::unique_ptr<Function<T, dim>> &p) : global_best(0.f), a(0.f), b(0.f), particles(0)
+        Swarm(std::unique_ptr<Function<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b)
+            : particles(0), fitness_function(std::move(p)), global_best(0.f), global_best_value(std::numeric_limits<T>::infinity()), a(_a), b(_b), current_iteration(0), max_iterations(0)
         {
-            fitness_function = std::move(p);
         }
 
-        void addParticle(const std::unique_ptr<Particle<T, dim>> &p)
+        void addParticle(std::unique_ptr<Particle<T, dim>> p)
         {
             p->reinit(Point<T, dim>([this](size_t i)
                                     { return generate_random(a[i], b[i]); }));
@@ -82,6 +83,7 @@ namespace Swarm
         float personal_best_value;
 
     public:
+        Particle();
         Point<T, dim> position;
         void reinit(const Point<T, dim> &initial_position);
         virtual void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, int current_iteration, int max_iterations) = 0;
@@ -93,6 +95,12 @@ namespace Swarm
     {
         position = initial_position;
         personal_best = initial_position;
+    }
+
+    template <typename T, int dim>
+    Particle<T, dim>::Particle()
+        : position(T(0)), personal_best(T(0)), personal_best_value(std::numeric_limits<T>::infinity())
+    {
     }
 
     /*
@@ -124,13 +132,10 @@ namespace Swarm
         void updateSpeed(const Point<T, dim> &global_best, int current_iteration, int max_iterations);
 
     public:
-        NormalParticle()
-        {
-            this->speed = Point<T, dim>(0);
-        }
+        NormalParticle() : Particle<T, dim>(), speed(0.f) {}
 
         void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, int current_iteration, int max_iterations) override;
-        void updatePersonalBest(const std::unique_ptr<Function<T, dim>> &func, int current_iteration);
+        void updatePersonalBest(const Function<T, dim> &func, int current_iteration);
     };
 
     /*
@@ -147,7 +152,7 @@ namespace Swarm
         const ChaosMap<T, dim> &chaosMap;
 
     public:
-        ChaoticParticle(const ChaosMap<T, dim> &map) : chaosMap(map) {}
+        ChaoticParticle(const ChaosMap<T, dim> &map) : Particle<T, dim>(), chaosMap(map) {}
 
         void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, int current_iteration, int max_iterations) override;
     };
@@ -188,7 +193,8 @@ namespace Swarm
 
             if (auto *normalParticle = dynamic_cast<NormalParticle<T, dim> *>(particle.get()))
             {
-                normalParticle->updatePersonalBest(fitness_function, current_iteration);
+                // pass the underlying Function by reference to avoid copying the unique_ptr
+                normalParticle->updatePersonalBest(*fitness_function, current_iteration);
             }
         }
 
@@ -255,7 +261,7 @@ namespace Swarm
         the function updates the personal best position and value of the normal particle if the current position is better
     */
     template <typename T, int dim>
-    void NormalParticle<T, dim>::updatePersonalBest(const std::unique_ptr<Function<T, dim>> &func, int current_iteration)
+    void NormalParticle<T, dim>::updatePersonalBest(const Function<T, dim> &func, int current_iteration)
     {
         float current_value = func.evaluate(this->position);
         if (current_value < this->personal_best_value)
@@ -279,7 +285,7 @@ namespace Swarm
     template <typename T, int dim>
     void ChaoticParticle<T, dim>::updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, int current_iteration, int max_iterations)
     {
-        this->position = chaosMap.getPoint(this->position, a, b);
+        this->position = chaosMap.getPoint(this->position, a, b, current_iteration);
     }
 }
 #endif
