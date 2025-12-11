@@ -244,6 +244,16 @@ namespace Swarm
             return os;
         }
 
+        Point<T, dim> &operator=(Point<T, dim> other)
+        {
+            for (size_t i = 0; i < dim; i++)
+            {
+                coordinates[i] = other[i];
+            }
+
+            return *this;
+        }
+
     private:
         // Stores the value of each coordinate.
         T coordinates[dim];
