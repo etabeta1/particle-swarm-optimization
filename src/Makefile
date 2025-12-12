@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++23 -Wall -Wextra -O2
+CXXFLAGS := -std=c++23 -Wall -Wextra -O2 -march=native -fsanitize=address
 LDFLAGS := 
 
 SRC_DIR := .
@@ -12,7 +12,7 @@ TARGET := $(BIN_DIR)/program
 
 .PHONY: all run clean
 
-all: $(TARGET)
+all: $(TARGET) $(HEADERS)
 
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(BIN_DIR)
