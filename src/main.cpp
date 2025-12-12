@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <memory>
+#include <chrono>
 
 #include "chaosmap.hpp"
 #include "point.hpp"
@@ -37,7 +38,6 @@ int main()
 
     Swarm::ChaosMap<T, dim> chaosMap(f, map_a, map_b);
 
-
     Swarm::Swarm<T, dim> swarm(fitness, a, b, max_iterations);
 
     for (int i = 0; i < nN; ++i)
@@ -49,7 +49,7 @@ int main()
     {
         swarm.addParticle(std::make_unique<Swarm::ChaoticParticle<T, dim>>(chaosMap));
     }
-
+    auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < max_iterations; ++i)
     {
         std::cout << "Iteration: " << i << std::endl;
@@ -57,7 +57,11 @@ int main()
         std::cout << "Best value = " << swarm.getGlobalBestValue() << std::endl;
         std::cout << "Best position = " << swarm.getGlobalBest() << std::endl;
     }
-
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout <<"\n---------FINAL_RESULTS----------\n"<< std::endl;
+    std::chrono::duration<double> elapsed = end - start;
+    std::cout << "target_function CPU time: "
+              << elapsed.count() << " s\n";
     std::cout << "Best value = " << swarm.getGlobalBestValue() << std::endl;
     std::cout << "Best position = " << swarm.getGlobalBest() << std::endl;
 }
