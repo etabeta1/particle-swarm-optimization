@@ -13,6 +13,7 @@ x = data[:, 0]
 y = data[:, 1]
 z = data[:, 2]
 k = data[:, 3]
+p_type = data[:, 4]
 unique_k = np.unique(k)
 
 
@@ -44,16 +45,25 @@ k0 = unique_k[0]
 title_obj = ax.set_title(f"k = {k0}")
 scat = ax.scatter([], [], [], c=[])  
 
+scat_normal = ax.scatter([], [], [], c='blue', marker='o', label='Normal')  
+scat_chaotic = ax.scatter([], [], [], c='red', marker='^', label='Chaotic')
 
 def update(k_value):
-    global scat
+    global scat_normal, scat_chaotic
 
-    if scat:
-        scat.remove()
+    if scat_normal: scat_normal.remove()
+    if scat_chaotic: scat_chaotic.remove()
 
-    mask = np.isclose(k, k_value)
 
-    scat = ax.scatter(x[mask], y[mask], z[mask], c=z[mask], cmap="viridis", s=40, depthshade=False)
+    mask_iter = np.isclose(k, k_value)
+    
+
+    mask_normal = mask_iter & (p_type == 0)
+    mask_chaotic = mask_iter & (p_type == 1)
+
+    scat_normal = ax.scatter(x[mask_normal], y[mask_normal], z[mask_normal], c='blue', marker='o', s=30, alpha=0.6)
+
+    scat_chaotic = ax.scatter(x[mask_chaotic], y[mask_chaotic], z[mask_chaotic], c='red', marker='^', s=50, alpha=0.8)
 
     title_obj.set_text(f"k = {k_value}")
 

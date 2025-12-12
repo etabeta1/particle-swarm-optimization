@@ -35,6 +35,7 @@ int main()
 
     Swarm::ChaosMap<T, dim> chaosMap(f, map_a, map_b);
 
+
     Swarm::Swarm<T, dim> swarm(fitness, a, b, max_iterations);
 
     for (int i = 0; i < nN; ++i)

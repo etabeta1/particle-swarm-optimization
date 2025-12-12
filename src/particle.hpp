@@ -13,6 +13,7 @@ namespace Swarm
         - `dim` is the number of dimensions for the vector (defaults to 2)
 
         - updatePosition: updates the position of the particle
+        - getType : returns the type of the particle
     */
     template <typename T, int dim>
     class Particle
@@ -33,6 +34,7 @@ namespace Swarm
         }
 
         virtual void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, int current_iteration, int max_iterations) = 0;
+        virtual int getType() const = 0;
         virtual ~Particle() {}
 
         /*
@@ -144,6 +146,17 @@ namespace Swarm
 
             this->position = (this->position + this->speed).clamp(a, b);
         }
+
+        /*
+            Description of the function getType
+            - parameters: none
+
+            the function returns the type of the particle, which is 0 for normal particles
+        */
+        int getType() const override
+        {
+            return 0; // Normal particle type
+        }
     };
 
     /*
@@ -176,6 +189,17 @@ namespace Swarm
         void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, int current_iteration, int max_iterations) override
         {
             this->position = chaosMap.getPoint(this->position, a, b, current_iteration);
+        }
+
+        /*
+            Description of the function getType
+            - parameters: none
+
+            the function returns the type of the particle, which is 1 for chaotic particles
+        */
+        int getType() const override
+        {
+            return 1; // Chaotic particle type
         }
     };
 };
