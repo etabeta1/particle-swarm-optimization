@@ -5,6 +5,7 @@
 #include "function.hpp"
 #include "particle.hpp"
 #include "funcs.hpp"
+#include "utils.hpp"
 
 #include <cmath>
 #include <vector>
@@ -40,21 +41,25 @@ namespace Swarm
         Point<T, dim> a;
         Point<T, dim> b;
 
-        int current_iteration;
-        int max_iterations;
+        IterationType current_iteration;
+        IterationType max_iterations;
 
         std::ofstream positions_file;
 
     public:
-        Swarm(std::unique_ptr<Function<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b, int _max_iterations) : particles(0), fitness_function(std::move(p)), global_best(0.f), global_best_value(std::numeric_limits<T>::infinity()), a(_a), b(_b), current_iteration(1), max_iterations(_max_iterations) {
+        Swarm(std::unique_ptr<Function<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b, IterationType _max_iterations) : particles(0), fitness_function(std::move(p)), global_best(T(0)), global_best_value(std::numeric_limits<T>::infinity()), a(_a), b(_b), current_iteration(1), max_iterations(_max_iterations)
+        {
             positions_file.open("points_xy.txt");
-            if (!positions_file.is_open()) {
+            if (!positions_file.is_open())
+            {
                 std::cerr << "Can't open the points file" << std::endl;
             }
         }
 
-        ~Swarm() {
-            if (positions_file.is_open()) {
+        ~Swarm()
+        {
+            if (positions_file.is_open())
+            {
                 positions_file.close();
             }
         }
@@ -101,16 +106,16 @@ namespace Swarm
                 particle->updatePosition(this->global_best, this->a, this->b, current_iteration, max_iterations);
                 particle->updatePersonalBest(*fitness_function);
 
-                if (positions_file.is_open()) {
+                if (positions_file.is_open())
+                {
                     Point<T, dim> pos = particle->getPosition();
                     float val = fitness_function->evaluate(pos);
-                    
-                    positions_file << pos[0] << " "   // X
-                              << pos[1] << " "   // Y
-                              << val << " "      // Z 
-                              << current_iteration << " " // Iterazione (k)
-                              << particle->getType() << "\n"; // Type (0=Normal, 1=Chaotic)
 
+                    positions_file << pos[0] << " "                // X
+                                   << pos[1] << " "                // Y
+                                   << val << " "                   // Z
+                                   << current_iteration << " "     // Iterazione (k)
+                                   << particle->getType() << "\n"; // Type (0=Normal, 1=Chaotic)
                 }
             }
 

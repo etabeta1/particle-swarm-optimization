@@ -33,7 +33,7 @@ namespace Swarm
             personal_best_value = func.evaluate(initial_position);
         }
 
-        virtual void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, int current_iteration, int max_iterations) = 0;
+        virtual void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType max_iterations) = 0;
         virtual int getType() const = 0;
         virtual ~Particle() {}
 
@@ -106,7 +106,7 @@ namespace Swarm
 
             the function updates the speed of the normal particle based on the CHOPSO velocity update formula
         */
-        void updateSpeed(const Point<T, dim> &global_best, int current_iteration, int max_iterations)
+        void updateSpeed(const Point<T, dim> &global_best, IterationType current_iteration, IterationType max_iterations)
         {
             // CHOPSO velocity update formula
             // v(t+1) = w*v(t) + k1*(pBest - x(t)) + k2*(gBest - x(t))
@@ -127,7 +127,7 @@ namespace Swarm
         }
 
     public:
-        NormalParticle() : Particle<T, dim>(), speed(0.f) {}
+        NormalParticle() : Particle<T, dim>(), speed(T(0)) {}
 
         /*
             Description of the function updatePosition
@@ -140,7 +140,7 @@ namespace Swarm
 
             the function updates the position of the normal particle based on its speed and clamps it within the boundaries
         */
-        void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, int current_iteration, int max_iterations) override
+        void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType max_iterations) override
         {
             updateSpeed(global_best, current_iteration, max_iterations);
 
@@ -186,7 +186,7 @@ namespace Swarm
 
             the function updates the position of the chaotic particle based on a chaotic map
         */
-        void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, int current_iteration, int max_iterations) override
+        void updatePosition(const Point<T, dim> &, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType) override
         {
             this->position = chaosMap.getPoint(this->position, a, b, current_iteration);
         }

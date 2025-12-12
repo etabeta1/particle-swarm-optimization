@@ -3,6 +3,8 @@
 
 namespace Swarm
 {
+    using IterationType = uint64_t;
+
     template <typename T, typename U>
     concept Addable = requires(T a, U b) {
         a + b;
