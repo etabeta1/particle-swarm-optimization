@@ -12,8 +12,10 @@
 int main()
 {
     int nN, nC;
-    int max_iterations = 7;
+    int max_iterations;
 
+    std::cout << "Enter the number of iterations" << std::endl;
+    std::cin >> max_iterations;
     std::cout << "Enter the number of normal particles." << std::endl;
     std::cin >> nN;
     std::cout << "\n"
