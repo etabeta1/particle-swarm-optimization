@@ -12,16 +12,16 @@
 
 int main()
 {
-    int nN, nC;
-    int max_iterations;
+    int nN = 10000, nC = 10000;
+    int max_iterations = 10000;
 
-    std::cout << "Enter the number of iterations" << std::endl;
-    std::cin >> max_iterations;
-    std::cout << "Enter the number of normal particles." << std::endl;
-    std::cin >> nN;
-    std::cout << "\n"
-              << "Enter the number of chaotic particles." << std::endl;
-    std::cin >> nC;
+    // std::cout << "Enter the number of iterations" << std::endl;
+    // std::cin >> max_iterations;
+    // std::cout << "Enter the number of normal particles." << std::endl;
+    // std::cin >> nN;
+    // std::cout << "\n"
+    //           << "Enter the number of chaotic particles." << std::endl;
+    // std::cin >> nC;
 
     using T = float;
     constexpr int dim = 2;
@@ -49,19 +49,17 @@ int main()
     {
         swarm.addParticle(std::make_unique<Swarm::ChaoticParticle<T, dim>>(chaosMap));
     }
+
     auto start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < max_iterations; ++i)
-    {
-        std::cout << "Iteration: " << i << std::endl;
-        swarm.updateEveryone();
-        std::cout << "Best value = " << swarm.getGlobalBestValue() << std::endl;
-        std::cout << "Best position = " << swarm.getGlobalBest() << std::endl;
-    }
+    swarm.run();
+
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout <<"\n---------FINAL_RESULTS----------\n"<< std::endl;
+    std::cout << "\n---------FINAL_RESULTS----------\n"
+              << std::endl;
     std::chrono::duration<double> elapsed = end - start;
     std::cout << "target_function CPU time: "
               << elapsed.count() << " s\n";
-    std::cout << "Best value = " << swarm.getGlobalBestValue() << std::endl;
-    std::cout << "Best position = " << swarm.getGlobalBest() << std::endl;
+    auto best = swarm.getGlobalBest();
+    std::cout << "Best value = " << best.value << std::endl;
+    std::cout << "Best position = " << best.point << std::endl;
 }

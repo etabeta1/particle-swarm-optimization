@@ -12,9 +12,40 @@
 #include <memory>
 #include <limits>
 #include <fstream>
+#include <omp.h>
+
+#define _TO_STRING(x) #x
+#define TO_STRING(x) _TO_STRING(x)
+
+#define ENABLE_REDUCTION(T, dim)                                                                           \
+    _Pragma(TO_STRING(                                                                                     \
+        omp declare reduction(                                                                             \
+            findBestPoint : Swarm::EvaluatedPoint<T, dim> : betterPointReduction<T, dim>(omp_out, omp_in)) \
+            initializer(omp_priv = {                                                                       \
+                            Swarm::EvaluatedPoint<T, dim>({Swarm::Point<T, dim>(T(0)),                     \
+                                                           std::numeric_limits<T>::infinity()})})))
+namespace Swarm
+{
+    template <typename T = float, int dim = 2>
+    struct EvaluatedPoint
+    {
+        Point<T, dim> point;
+        float value;
+    };
+}
+
+template <typename T = float, int dim = 2>
+void betterPointReduction(Swarm::EvaluatedPoint<T, dim> &inout, Swarm::EvaluatedPoint<T, dim> &in)
+{
+    if (in.value < inout.value)
+    {
+        inout = in;
+    }
+}
 
 namespace Swarm
 {
+
     template <typename T = float, int dim = 2>
     class Particle;
     // Class Declarations
@@ -35,8 +66,10 @@ namespace Swarm
         // const Function<T, dim> &fitness_function;
         std::unique_ptr<Function<T, dim>> fitness_function;
 
-        Point<T, dim> global_best;
-        float global_best_value;
+        // Point<T, dim> global_best;
+        // float global_best_value;
+
+        EvaluatedPoint<T, dim> global_best{Point<T, dim>(T(0)), std::numeric_limits<T>::infinity()};
 
         Point<T, dim> a;
         Point<T, dim> b;
@@ -47,7 +80,7 @@ namespace Swarm
         std::ofstream positions_file;
 
     public:
-        Swarm(std::unique_ptr<Function<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b, IterationType _max_iterations) : particles(0), fitness_function(std::move(p)), global_best(T(0)), global_best_value(std::numeric_limits<T>::infinity()), a(_a), b(_b), current_iteration(1), max_iterations(_max_iterations)
+        Swarm(std::unique_ptr<Function<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b, IterationType _max_iterations) : particles(0), fitness_function(std::move(p)), a(_a), b(_b), current_iteration(1), max_iterations(_max_iterations)
         {
             positions_file.open("points_xy.txt");
             if (!positions_file.is_open())
@@ -72,22 +105,13 @@ namespace Swarm
             particles.emplace_back(std::move(p));
         }
 
-        /*
-            Description of the function findGlobalBest
-            - parameters: none
-
-            the function iterates through all particles to find the one with the best fitness value
-        */
-        void findGlobalBest()
+        void run()
         {
-            for (const auto &particle : particles)
+#pragma omp parallel default(private)
             {
-                // float fitness = fitness_function->evaluate(particle->getPosition());
-                float fitness = particle->getPersonalBestValue();
-                if (fitness < global_best_value)
+                for (IterationType it = 0; it < max_iterations; ++it)
                 {
-                    global_best_value = fitness;
-                    global_best = particle->getPosition();
+                    updateEveryone();
                 }
             }
         }
@@ -101,38 +125,53 @@ namespace Swarm
         */
         void updateEveryone()
         {
+#pragma omp for schedule(static) reduction(findBestPoint : global_best)
             for (auto &particle : particles)
             {
-                particle->updatePosition(this->global_best, this->a, this->b, current_iteration, max_iterations);
-                particle->updatePersonalBest(*fitness_function);
+                particle->updatePosition(global_best.point, a, b, current_iteration, max_iterations);
+                bool update = particle->updatePersonalBest(*fitness_function);
 
-                if (positions_file.is_open())
-                {
-                    Point<T, dim> pos = particle->getPosition();
-                    float val = fitness_function->evaluate(pos);
+                // Point<T, dim> pos = particle->getPosition();
+                // float val = fitness_function->evaluate(pos);
 
-                    positions_file << pos[0] << " "                // X
-                                   << pos[1] << " "                // Y
-                                   << val << " "                   // Z
-                                   << current_iteration << " "     // Iterazione (k)
-                                   << particle->getType() << "\n"; // Type (0=Normal, 1=Chaotic)
-                }
+                float fitness = particle->getPersonalBestValue();
+                global_best = {particle->getPosition(), fitness};
+
+                // if (positions_file.is_open())
+                // {
+
+                //     /*
+                //     positions_file << pos[0] << " "                // X
+                //                    << pos[1] << " "                // Y
+                //                    << val << " "                   // Z
+                //                    << current_iteration << " "     // Iterazione (k)
+                //                    << particle->getType() << "\n"; // Type (0=Normal, 1=Chaotic)
+                //                    */
+                // }
             }
 
-            findGlobalBest();
+            // findGlobalBest();
 
             ++current_iteration;
         }
 
-        Point<T, dim> getGlobalBest() const
+        // Point<T, dim> getGlobalBest() const
+        // {
+        //     return global_best;
+        // }
+
+        // float getGlobalBestValue() const
+        // {
+        //     return global_best_value;
+        // }
+
+        EvaluatedPoint<T, dim> getGlobalBest() const
         {
             return global_best;
         }
-
-        float getGlobalBestValue() const
-        {
-            return global_best_value;
-        }
     };
 }
+
+ENABLE_REDUCTION(float, 2);
+
 #endif

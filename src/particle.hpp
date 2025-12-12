@@ -45,14 +45,18 @@ namespace Swarm
 
             the function updates the personal best position and value of the normal particle if the current position is better
         */
-        void updatePersonalBest(const Function<T, dim> &func)
+        bool updatePersonalBest(const Function<T, dim> &func)
         {
             float current_value = func.evaluate(this->position);
             if (current_value < this->personal_best_value)
             {
                 this->personal_best_value = current_value;
                 this->personal_best = this->position;
+
+                return true;
             }
+
+            return false;
         }
 
         Point<T, dim> &getPosition()
