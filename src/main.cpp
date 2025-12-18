@@ -10,22 +10,15 @@
 #include "function.hpp"
 #include "utils.hpp"
 
-int main()
+std::chrono::duration<double> measure(int threads, int particles)
 {
-    int nN = 10000, nC = 10000;
-    int max_iterations = 10000;
-
-    // std::cout << "Enter the number of iterations" << std::endl;
-    // std::cin >> max_iterations;
-    // std::cout << "Enter the number of normal particles." << std::endl;
-    // std::cin >> nN;
-    // std::cout << "\n"
-    //           << "Enter the number of chaotic particles." << std::endl;
-    // std::cin >> nC;
-
     using T = float;
     constexpr int dim = 2;
 
+    int nN = particles, nC = particles;
+    int max_iterations = 10000;
+
+    omp_set_num_threads(threads);
     std::unique_ptr<Swarm::Function<T, dim>> fitness = std::make_unique<Swarm::DropwaveFunction<T, dim>>();
 
     Swarm::Point<T, dim> map_a(-1.f);
@@ -57,9 +50,42 @@ int main()
     std::cout << "\n---------FINAL_RESULTS----------\n"
               << std::endl;
     std::chrono::duration<double> elapsed = end - start;
+    std::cout << "Threads: " << threads << std::endl;
     std::cout << "target_function CPU time: "
               << elapsed.count() << " s\n";
     auto best = swarm.getGlobalBest();
     std::cout << "Best value = " << best.value << std::endl;
     std::cout << "Best position = " << best.point << std::endl;
+
+    return elapsed;
+}
+
+int main()
+{
+
+    // std::cout << "Enter the number of iterations" << std::endl;
+    // std::cin >> max_iterations;
+    // std::cout << "Enter the number of normal particles." << std::endl;
+    // std::cin >> nN;
+    // std::cout << "\n"
+    //           << "Enter the number of chaotic particles." << std::endl;
+    // std::cin >> nC;
+
+    std::ofstream measurements;
+    measurements.open("time.txt");
+
+    measurements << "Threads,T10k,T40k,T160k" << std::endl;
+
+    for (int i = 1; i <= 28; i++)
+    {
+        measurements << i << ",";
+
+        std::chrono::duration<double> t10k = measure(i, 10000);
+        std::chrono::duration<double> t20k = measure(i, 40000);
+        std::chrono::duration<double> t40k = measure(i, 160000);
+
+        measurements << t10k << "," << t20k << "," << t40k << std::endl;
+    }
+
+    measurements.close();
 }

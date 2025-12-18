@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++23 -Wall -Wextra -O2 -march=native -fsanitize=address -fopenmp
+CXXFLAGS := -std=c++23 -Wall -Wextra -O2 -march=native -fopenmp
 LDFLAGS := 
 
 SRC_DIR := .
