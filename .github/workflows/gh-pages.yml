@@ -12,7 +12,7 @@ on:
         - name: Install Doxygen
           run: sudo apt-get install -y doxygen graphviz
         - name: Run Doxygen
-          run: doxygen Doxyfile
+          run: PROJECT_NUMBER=$(git log -1 --format="%h (%cd)") doxygen Doxyfile
         - name: Upload artifact
           uses: actions/upload-pages-artifact@v3
           with:
