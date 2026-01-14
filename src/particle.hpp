@@ -6,26 +6,46 @@
 
 namespace Swarm
 {
-
-    /*
-        Definition of a generic particle in the swarm.
-        - `T` is the type used to store the coordinates (defaults to `float`)
-        - `dim` is the number of dimensions for the vector (defaults to 2)
-
-        - updatePosition: updates the position of the particle
-        - getType : returns the type of the particle
-    */
+    /**
+     * \brief Abstract base class representing a particle in the swarm.
+     * \tparam T The type used to store the coordinates (defaults to `float`)
+     * \tparam dim The number of dimensions for the vector (defaults to 2)
+     *
+     * This class serves as a base for different types of particles in the swarm optimization algorithm.
+     */
     template <typename T, int dim>
     class Particle
     {
     protected:
+        /**
+         * \brief The current position of the particle.
+         */
         Point<T, dim> position;
+
+        /**
+         * \brief The personal best position of the particle.
+         */
         Point<T, dim> personal_best;
+
+        /**
+         * \brief The personal best value of the particle.
+         */
         float personal_best_value;
 
     public:
+        /**
+         * \brief Constructs a `Particle` with default position and personal best.
+         * The position and personal best are initialized to zero.
+         */
         Particle() : position(T(0)), personal_best(T(0)), personal_best_value(T(0)) {}
 
+        /**
+         * \brief Initializes the particle as the Swarm likes.
+         * \param initial_position The initial position of the particle.
+         * \param func The fitness function to evaluate the particle's position.
+         *
+         * The function sets the position, personal best, and personal best value of the particle.
+         */
         void reinit(const Point<T, dim> &initial_position, const Function<T, dim> &func)
         {
             position = initial_position;
@@ -33,18 +53,35 @@ namespace Swarm
             personal_best_value = func.evaluate(initial_position);
         }
 
+        /**
+         * \brief Updates the position of the particle.
+         * \param global_best The best position found by the swarm.
+         * \param a The minimum boundary for the position.
+         * \param b The maximum boundary for the position.
+         * \param current_iteration The current iteration of the swarm.
+         * \param max_iterations The maximum number of iterations for the swarm.
+         */
         virtual void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType max_iterations) = 0;
+
+        /**
+         * \brief Returns the type of the particle.
+         * \return An integer representing the type of the particle.
+         * The type can be used to distinguish between different particle behaviors.
+         */
         virtual int getType() const = 0;
+
+        /**
+         * \brief Virtual destructor for the `Particle` class.
+         *
+         * Ensures proper cleanup of derived classes.
+         */
         virtual ~Particle() {}
 
-        /*
-            Description of the function updatePersonalBest
-            - parameters:
-                - func: the fitness function to evaluate the particle's position
-                - current_iteration: the current iteration of the swarm
-
-            the function updates the personal best position and value of the normal particle if the current position is better
-        */
+        /**
+         * \brief Updates the personal best position and value of the particle.
+         * \param func The fitness function to evaluate the particle's position.
+         * \return `true` if the personal best was updated, `false` otherwise.
+         */
         bool updatePersonalBest(const Function<T, dim> &func)
         {
             float current_value = func.evaluate(this->position);
@@ -59,16 +96,30 @@ namespace Swarm
             return false;
         }
 
+        /**
+         * \brief Returns a reference to the current position of the particle.
+         * \return A reference to the `Point` representing the particle's position.
+         * \see Point
+         */
         Point<T, dim> &getPosition()
         {
             return position;
         }
 
+        /**
+         * \brief Returns a reference to the personal best position of the particle.
+         * \return A reference to the `Point` representing the particle's personal best position.
+         * \see Point
+         */
         Point<T, dim> &getPersonalBest()
         {
             return personal_best;
         }
 
+        /**
+         * \brief Returns the personal best value of the particle.
+         * \return A float representing the particle's personal best value.
+         */
         float getPersonalBestValue()
         {
             return personal_best_value;
@@ -92,24 +143,39 @@ namespace Swarm
         the last two functions are specific to the normal particle
 
     */
+    /**
+     * \brief Definition of the normal particle.
+     * \tparam T The type used to store the coordinates (defaults to `float`).
+     * \tparam dim The number of dimensions for the vector (defaults to 2).
+     *
+     * This class represents a normal particle that follows the PSO logic.
+     */
     template <typename T = float, int dim = 2>
     class NormalParticle : public Particle<T, dim>
     {
     private:
+        /**
+         * \brief The speed of the particle.
+         */
         Point<T, dim> speed;
 
+        /**
+         * \brief Cognitive coefficient.
+         */
         float c1 = 2.5f;
+        /**
+         * \brief Social coefficient.
+         */
         float c2 = 2.5f;
 
-        /*
-            Description of the function updateSpeed
-            - parameters:
-                - global_best: the best position found by the swarm
-                - current_iteration: the current iteration of the swarm
-                - max_iterations: the maximum number of iterations for the swarm
-
-            the function updates the speed of the normal particle based on the CHOPSO velocity update formula
-        */
+        /**
+         * \brief Updates the speed of the normal particle.
+         * \param global_best The best position found by the swarm.
+         * \param current_iteration The current iteration of the swarm.
+         * \param max_iterations The maximum number of iterations for the swarm.
+         *
+         * This function updates the speed of the normal particle based on the CHOPSO velocity update formula.
+         */
         void updateSpeed(const Point<T, dim> &global_best, IterationType current_iteration, IterationType max_iterations)
         {
             // CHOPSO velocity update formula
@@ -131,19 +197,23 @@ namespace Swarm
         }
 
     public:
+        /**
+         * \brief Constructs a `NormalParticle` with default position and speed.
+         *
+         * The position and speed are initialized to zero.
+         */
         NormalParticle() : Particle<T, dim>(), speed(T(0)) {}
 
-        /*
-            Description of the function updatePosition
-            - parameters:
-                - global_best: the best position found by the swarm
-                - a: the minimum boundary for the position
-                - b: the maximum boundary for the position
-                - current_iteration: the current iteration of the swarm
-                - max_iterations: the maximum number of iterations for the swarm
-
-            the function updates the position of the normal particle based on its speed and clamps it within the boundaries
-        */
+        /**
+         * \brief Updates the position of the normal particle.
+         * \param global_best The best position found by the swarm.
+         * \param a The minimum boundary for the position.
+         * \param b The maximum boundary for the position.
+         * \param current_iteration The current iteration of the swarm.
+         * \param max_iterations The maximum number of iterations for the swarm.
+         *
+         * This function updates the position of the normal particle based on its speed and clamps it within the boundaries.
+         */
         void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType max_iterations) override
         {
             updateSpeed(global_best, current_iteration, max_iterations);
@@ -151,56 +221,60 @@ namespace Swarm
             this->position = (this->position + this->speed).clamp(a, b);
         }
 
-        /*
-            Description of the function getType
-            - parameters: none
-
-            the function returns the type of the particle, which is 0 for normal particles
-        */
+        /**
+         * \brief Returns the type of the normal particle.
+         * \return An integer representing the type of the particle (0 for normal particles).
+         *
+         * The type can be used to distinguish between different particle behaviors.
+         */
         int getType() const override
         {
             return 0; // Normal particle type
         }
     };
 
-    /*
-        Definition of the chaotic particle
-        - `T` is the type used to store the coordinates (defaults to `float`)
-        - `dim` is the number of dimensions for the vector (defaults to 2)
-
-        - updatePosition: updates the position of the particle based on a chaotic map
-    */
+    /**
+     * \brief Definition of the chaotic particle.
+     * \tparam T The type used to store the coordinates (defaults to `float`)
+     * \tparam dim The number of dimensions for the vector (defaults to 2)
+     *
+     * This class represents a chaotic particle that updates its position based on a chaotic map.
+     */
     template <typename T = float, int dim = 2>
     class ChaoticParticle : public Particle<T, dim>
     {
     private:
+        /**
+         * \brief The chaos map used to update the particle's position.
+         */
         const ChaosMap<T, dim> &chaosMap;
 
     public:
+        /**
+         * \brief Constructs a `ChaoticParticle` with the given chaos map.
+         * \param map The chaos map used to update the particle's position.
+         */
         ChaoticParticle(const ChaosMap<T, dim> &map) : Particle<T, dim>(), chaosMap(map) {}
 
-        /*
-            Description of the function updatePosition
-            - parameters:
-                - global_best: the best position found by the swarm
-                - a: the minimum boundary for the position
-                - b: the maximum boundary for the position
-                - current_iteration: the current iteration of the swarm
-                - max_iterations: the maximum number of iterations for the swarm
-
-            the function updates the position of the chaotic particle based on a chaotic map
-        */
+        /**
+         * \brief Updates the position of the chaotic particle.
+         * \param global_best The best position found by the swarm.
+         * \param a The minimum boundary for the position.
+         * \param b The maximum boundary for the position.
+         * \param current_iteration The current iteration of the swarm.
+         * \param max_iterations The maximum number of iterations for the swarm.
+         *
+         * This function updates the position of the chaotic particle based on the chaos map.
+         */
         void updatePosition(const Point<T, dim> &, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType) override
         {
             this->position = chaosMap.getPoint(this->position, a, b, current_iteration);
         }
 
-        /*
-            Description of the function getType
-            - parameters: none
-
-            the function returns the type of the particle, which is 1 for chaotic particles
-        */
+        /**
+         * \brief Returns the type of the chaotic particle.
+         * \return An integer representing the type of the particle (1 for chaotic particles).
+         */
         int getType() const override
         {
             return 1; // Chaotic particle type
