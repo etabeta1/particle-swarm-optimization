@@ -46,7 +46,7 @@ namespace Swarm
          *
          * The function sets the position, personal best, and personal best value of the particle.
          */
-        void reinit(const Point<T, dim> &initial_position, const Function<T, dim> &func)
+        void reinit(const Point<T, dim> &initial_position, const ObjectiveFunction<T, dim> &func)
         {
             position = initial_position;
             personal_best = initial_position;
@@ -82,7 +82,7 @@ namespace Swarm
          * \param func The fitness function to evaluate the particle's position.
          * \return `true` if the personal best was updated, `false` otherwise.
          */
-        bool updatePersonalBest(const Function<T, dim> &func)
+        bool updatePersonalBest(const ObjectiveFunction<T, dim> &func)
         {
             float current_value = func.evaluate(this->position);
             if (current_value < this->personal_best_value)

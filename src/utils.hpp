@@ -49,6 +49,16 @@ namespace Swarm
     };
 
     /**
+     * \brief Concept requiring that the selected types supports comparison.
+     * \tparam T The first type.
+     * \tparam U The second type.
+     */
+    template <typename T, typename U>
+    concept Comparable = requires(T a, U b) {
+        a <= b;
+    };
+
+    /**
      * \brief Concept requiring that the selected types supports triple comparison.
      * \tparam T The first type.
      * \tparam U The second type.

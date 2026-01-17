@@ -361,6 +361,18 @@ namespace Swarm
             return *this;
         }
 
+        bool isInsideBox(const Point<T, dim> &a, const Point<T, dim> &a) const
+        {
+            for (size_t i = 0; i < dim; i++)
+            {
+                if (coordinates[i] < std::min(a[i], b[i]) || coordinates[i] > std::max(a[i], b[i]))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
     private:
         /**
          * \brief The array storing the coordinates of the point.

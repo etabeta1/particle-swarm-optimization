@@ -19,7 +19,7 @@ std::chrono::duration<double> measure(int threads, int particles)
     int max_iterations = 10000;
 
     omp_set_num_threads(threads);
-    std::unique_ptr<Swarm::Function<T, dim>> fitness = std::make_unique<Swarm::DropwaveFunction<T, dim>>();
+    std::unique_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_unique<Swarm::DropwaveFunction<T, dim>>();
 
     Swarm::Point<T, dim> map_a(-1.f);
     Swarm::Point<T, dim> map_b(1.f);

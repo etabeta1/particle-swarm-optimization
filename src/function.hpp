@@ -10,25 +10,25 @@ namespace Swarm
      * \see Point
      */
     template <typename T = float, int dim = 2>
-    class Function
+    class ObjectiveFunction
     {
     public:
         virtual T evaluate(const Point<T, dim> &p) const = 0;
-        virtual ~Function() = default;
+        virtual ~ObjectiveFunction() = default;
     };
 
     /**
      * \brief Class representing the Sphere objective function.
      * \tparam T The data type for the coordinates (default is float).
      * \tparam dim The dimensionality of the points (default is 2).
-     * \see Function
+     * \see ObjectiveFunction
      *
      * The Sphere function is defined as \f[
      * f(x) = \sum_{i=1}^{dim} x_i^2
      * \f]
      */
     template <typename T = float, int dim = 2>
-    class SphereFunction : public Function<T, dim>
+    class SphereFunction : public ObjectiveFunction<T, dim>
     {
     public:
         T evaluate(const Point<T, dim> &p) const override
@@ -43,14 +43,14 @@ namespace Swarm
      * \brief Class representing the Ellipsoid objective function.
      * \tparam T The data type for the coordinates (default is float).
      * \tparam dim The dimensionality of the points (default is 2).
-     * \see Function
+     * \see ObjectiveFunction
      *
      * The Ellipsoid function is defined as \f[
      * f(x) = \sum_{i=1}^{dim} i \cdot x_i^2
      * \f]
      */
     template <typename T = float, int dim = 2>
-    class EllipsoidFunction : public Function<T, dim>
+    class EllipsoidFunction : public ObjectiveFunction<T, dim>
     {
     public:
         T evaluate(const Point<T, dim> &p) const override
@@ -68,14 +68,14 @@ namespace Swarm
      * \brief Class representing the Quintic objective function.
      * \tparam T The data type for the coordinates (default is float).
      * \tparam dim The dimensionality of the points (default is 2).
-     * \see Function
+     * \see ObjectiveFunction
      *
      * The Quintic function is defined as \f[
      * f(x) = \sum_{i=1}^{dim} |x_i^5 - 3x_i^4 + 4x_i^3 + 2x_i^2 - 10x_i - 4|
      * \f]
      */
     template <typename T = float, int dim = 2>
-    class QuinticFunction : public Function<T, dim>
+    class QuinticFunction : public ObjectiveFunction<T, dim>
     {
     public:
         T evaluate(const Point<T, dim> &p) const override
@@ -90,14 +90,14 @@ namespace Swarm
      * \brief Class representing the DropWave objective function.
      * \tparam T The data type for the coordinates (default is float).
      * \tparam dim The dimensionality of the points (default is 2).
-     * \see Function
+     * \see ObjectiveFunction
      *
      * The DropWave function is defined as \f[
      * f(x) = 1 - \frac{1 + \cos(12 \sqrt{\sum_{i=1}^{dim} x_i^2})}{0.5 \cdot \sum_{i=1}^{dim} x_i^2 + 2}
      * \f]
      */
     template <typename T = float, int dim = 2>
-    class DropwaveFunction : public Function<T, dim>
+    class DropwaveFunction : public ObjectiveFunction<T, dim>
     {
     public:
         T evaluate(const Point<T, dim> &p) const override
@@ -114,14 +114,14 @@ namespace Swarm
      * \brief Class representing the Alpine1 objective function.
      * \tparam T The data type for the coordinates (default is float).
      * \tparam dim The dimensionality of the points (default is 2).
-     * \see Function
+     * \see ObjectiveFunction
      *
      * The Alpine1 function is defined as \f[
      * f(x) = \sum_{i=1}^{dim} |x_i \cdot \sin(x_i) + 0.1 \cdot x_i|
      * \f]
      */
     template <typename T = float, int dim = 2>
-    class Alpine1Function : public Function<T, dim>
+    class Alpine1Function : public ObjectiveFunction<T, dim>
     {
     public:
         T evaluate(const Point<T, dim> &p) const override
@@ -136,14 +136,14 @@ namespace Swarm
      * \brief Class representing the Ackley objective function.
      * \tparam T The data type for the coordinates (default is float).
      * \tparam dim The dimensionality of the points (default is 2).
-     * \see Function
+     * \see ObjectiveFunction
      *
      * The Ackley function is defined as \f[
      * f(x) = -20 \cdot \exp\left(-0.2 \cdot \sqrt{\frac{1}{dim} \sum_{i=1}^{dim} x_i^2}\right) - \exp\left(\frac{1}{dim} \sum_{i=1}^{dim} \cos(2 \pi x_i)\right) + 20 + e
      * \f]
      */
     template <typename T = float, int dim = 2>
-    class AckleyFunction : public Function<T, dim>
+    class AckleyFunction : public ObjectiveFunction<T, dim>
     {
     public:
         T evaluate(const Point<T, dim> &p) const override

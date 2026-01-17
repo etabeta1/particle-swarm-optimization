@@ -63,8 +63,8 @@ namespace Swarm
     {
     private:
         std::vector<std::unique_ptr<Particle<T, dim>>> particles; // stores both normal and chaotic particles
-        // const Function<T, dim> &fitness_function;
-        std::unique_ptr<Function<T, dim>> fitness_function;
+        // const ObjectiveFunction<T, dim> &fitness_function;
+        std::unique_ptr<ObjectiveFunction<T, dim>> fitness_function;
 
         // Point<T, dim> global_best;
         // float global_best_value;
@@ -80,7 +80,7 @@ namespace Swarm
         std::ofstream positions_file;
 
     public:
-        Swarm(std::unique_ptr<Function<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b, IterationType _max_iterations) : particles(0), fitness_function(std::move(p)), a(_a), b(_b), current_iteration(1), max_iterations(_max_iterations)
+        Swarm(std::unique_ptr<ObjectiveFunction<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b, IterationType _max_iterations) : particles(0), fitness_function(std::move(p)), a(_a), b(_b), current_iteration(1), max_iterations(_max_iterations)
         {
             positions_file.open("points_xy.txt");
             if (!positions_file.is_open())
