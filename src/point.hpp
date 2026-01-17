@@ -361,7 +361,7 @@ namespace Swarm
             return *this;
         }
 
-        bool isInsideBox(const Point<T, dim> &a, const Point<T, dim> &a) const
+        bool isInsideBox(const Point<T, dim> &a, const Point<T, dim> &b) const
         {
             for (size_t i = 0; i < dim; i++)
             {

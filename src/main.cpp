@@ -28,25 +28,16 @@ std::chrono::duration<double> measure(int threads, int particles)
 
     Swarm::Point<T, dim> a(-1000.f);
     Swarm::Point<T, dim> b(+1000.f);
+    Swarm::Point<T, dim> initial_pos(0.f);
 
     Swarm::ChaosMap<T, dim> chaosMap(f, map_a, map_b);
 
-    Swarm::Swarm<T, dim> swarm(fitness, a, b, max_iterations);
-
-    for (int i = 0; i < nN; ++i)
-    {
-        swarm.addParticle(std::make_unique<Swarm::NormalParticle<T, dim>>());
-    }
-
-    for (int i = 0; i < nC; ++i)
-    {
-        swarm.addParticle(std::make_unique<Swarm::ChaoticParticle<T, dim>>(chaosMap));
-    }
+    Swarm::CHOPSOOptimizer<T, dim> swarm(fitness, initial_pos, a, b, nN, nC, chaosMap, max_iterations, false);
 
     auto start = std::chrono::high_resolution_clock::now();
     swarm.run();
-
     auto end = std::chrono::high_resolution_clock::now();
+
     std::cout << "\n---------FINAL_RESULTS----------\n"
               << std::endl;
     std::chrono::duration<double> elapsed = end - start;

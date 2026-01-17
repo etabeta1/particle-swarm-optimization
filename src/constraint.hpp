@@ -34,7 +34,7 @@ namespace Swarm
         return [&a, &b](const Point<T, dim> &p)
         {
             return p.isInsideBox(a, b);
-        }
+        };
     }
 
     /**
@@ -53,7 +53,7 @@ namespace Swarm
         return [&constraint](const Point<T, dim> &p)
         {
             return !(constraint(p));
-        }
+        };
     }
 
     /**
@@ -73,7 +73,7 @@ namespace Swarm
         return [&center, distance](const Point<T, dim> &p)
         {
             return (center - p).norm2() <= distance;
-        }
+        };
     }
 
     /**
@@ -94,7 +94,7 @@ namespace Swarm
         return [&focus1, &focus2, constant](const Point<T, dim> &p)
         {
             return (focus1 - p).norm2() + (focus2 - p).norm2() <= constant;
-        }
+        };
     }
 
 }

@@ -1,19 +1,22 @@
 #ifndef _SWARM_HPP_
 #define _SWARM_HPP_
 
-#include "point.hpp"
-#include "chaosmap.hpp"
-#include "function.hpp"
-#include "particle.hpp"
-#include "funcs.hpp"
-#include "utils.hpp"
+#include <omp.h>
 
 #include <cmath>
-#include <vector>
-#include <memory>
-#include <limits>
 #include <fstream>
-#include <omp.h>
+#include <limits>
+#include <memory>
+#include <stdexcept>
+#include <vector>
+
+#include "chaosmap.hpp"
+#include "constraint.hpp"
+#include "funcs.hpp"
+#include "function.hpp"
+#include "particle.hpp"
+#include "point.hpp"
+#include "utils.hpp"
 
 /**
  * \brief Macro to convert a value to a string.
@@ -30,15 +33,14 @@
  * \param T The type used to store the coordinates (defaults to `float`).
  * \param dim The number of dimensions for the vector (defaults to 2).
  *
- * This macro defines an OpenMP reduction operation to find the best evaluated point among particles in the swarm.
+ * This macro defines an OpenMP reduction operation to find the best evaluated point among particles
+ * in the swarm.
  */
-#define ENABLE_REDUCTION(T, dim)                                                                           \
-    _Pragma(TO_STRING(                                                                                     \
-        omp declare reduction(                                                                             \
-            findBestPoint : Swarm::EvaluatedPoint<T, dim> : betterPointReduction<T, dim>(omp_out, omp_in)) \
-            initializer(omp_priv = {                                                                       \
-                            Swarm::EvaluatedPoint<T, dim>({Swarm::Point<T, dim>(T(0)),                     \
-                                                           std::numeric_limits<T>::infinity()})})))
+#define ENABLE_REDUCTION(T, dim)                                                                       \
+    _Pragma(TO_STRING(omp declare reduction(                                                           \
+        findBestPoint : Swarm::EvaluatedPoint<T, dim> : betterPointReduction<T, dim>(omp_out, omp_in)) \
+                          initializer(omp_priv = {Swarm::EvaluatedPoint<T, dim>(                       \
+                                          {Swarm::Point<T, dim>(T(0)), std::numeric_limits<T>::infinity()})})))
 namespace Swarm
 {
     /**
@@ -86,7 +88,7 @@ namespace Swarm
      * This class manages a swarm of particles and performs optimization using the CHOPSO algorithm.
      */
     template <typename T = float, int dim = 2>
-    class Swarm
+    class CHOPSOOptimizer
     {
     private:
         /**
@@ -102,7 +104,7 @@ namespace Swarm
         /**
          * \brief The best evaluated point found by the swarm.
          */
-        EvaluatedPoint<T, dim> global_best{Point<T, dim>(T(0)), std::numeric_limits<T>::infinity()};
+        EvaluatedPoint<T, dim> global_best;
 
         /**
          * \brief The lower bounds of the search space.
@@ -124,6 +126,8 @@ namespace Swarm
          */
         IterationType max_iterations;
 
+        std::vector<Constraint<T, dim>> constraints;
+
         /**
          * \brief File stream to log particle positions.
          */
@@ -131,29 +135,71 @@ namespace Swarm
 
     public:
         /**
-         * \brief Constructs a `Swarm` with the given parameters.
+         * \brief Constructs a `CHOPSOOptimizer` with the given parameters.
          * \param p A unique pointer to the fitness function.
          * \param _a The lower bounds of the search space.
          * \param _b The upper bounds of the search space.
          * \param _max_iterations The maximum number of iterations for the swarm.
          *
-         * This constructor initializes the swarm with the provided fitness function, search space bounds, and maximum iterations.
+         * This constructor initializes the swarm with the provided fitness function, search space
+         * bounds, and maximum iterations.
          */
-        Swarm(std::unique_ptr<ObjectiveFunction<T, dim>> &p, const Point<T, dim> &_a, const Point<T, dim> &_b, IterationType _max_iterations) : particles(0), fitness_function(std::move(p)), a(_a), b(_b), current_iteration(1), max_iterations(_max_iterations)
+        CHOPSOOptimizer(std::unique_ptr<ObjectiveFunction<T, dim>> &p,
+                        const Point<T, dim> &initial_position,
+                        const Point<T, dim> &_a,
+                        const Point<T, dim> &_b,
+                        size_t num_normal_particles,
+                        size_t num_chaotic_particles,
+                        const ChaosMap<T, dim> &chaos_map,
+                        IterationType _max_iterations,
+                        bool save_on_file)
+            : particles(0),
+              fitness_function(std::move(p)),
+              global_best(initial_position, fitness_function->evaluate(initial_position)),
+              a(_a),
+              b(_b),
+              current_iteration(1),
+              max_iterations(_max_iterations)
         {
-            positions_file.open("points_xy.txt");
-            if (!positions_file.is_open())
+            if (save_on_file)
             {
-                std::cerr << "Can't open the points file" << std::endl;
+                positions_file.open("points_xy.txt");
+                if (!positions_file.is_open())
+                {
+                    std::cerr << "Can't open the points file" << std::endl;
+                }
             }
+
+            if (!initial_position.isInsideBox(a, b))
+            {
+                throw std::invalid_argument("Initial position is not inside global search space");
+            }
+
+            for (size_t i = 0; i < num_normal_particles; i++)
+            {
+                std::unique_ptr<Particle<T, dim>> particle = std::make_unique<NormalParticle<T, dim>>();
+                particle->reinit(initial_position, *fitness_function);
+                particles.emplace_back(std::move(particle));
+            }
+
+            for (size_t i = 0; i < num_chaotic_particles; i++)
+            {
+                std::unique_ptr<Particle<T, dim>> particle = std::make_unique<ChaoticParticle<T, dim>>(chaos_map);
+                particle->reinit(Point<T, dim>([this](size_t i)
+                                               { return generate_random(a[i], b[i]); }),
+                                 *fitness_function);
+                particles.emplace_back(std::move(particle));
+            }
+
+            constraints.emplace_back(makeBoxConstraint(a, b));
         }
 
         /**
-         * \brief Destructor for the `Swarm` class.
+         * \brief Destructor for the `CHOPSOOptimizer` class.
          *
          * Closes the positions file if it is open.
          */
-        ~Swarm()
+        ~CHOPSOOptimizer()
         {
             if (positions_file.is_open())
             {
@@ -161,30 +207,27 @@ namespace Swarm
             }
         }
 
-        /**
-         * \brief Adds a particle to the swarm.
-         * \param p A unique pointer to the particle to add.
-         *
-         * This function initializes the particle's position and personal best using random values within the search space bounds, and then adds it to the swarm.
-         */
-        void addParticle(std::unique_ptr<Particle<T, dim>> p)
+        void addConstraint(const Constraint<T, dim> &constraint)
         {
-            p->reinit(Point<T, dim>([this](size_t i)
-                                    { return generate_random(a[i], b[i]); }),
-                      *fitness_function);
-            particles.emplace_back(std::move(p));
+            if (!(constraint(global_best.point)))
+            {
+                throw std::invalid_argument("Constraint would invalidate current global best position.");
+            }
+
+            constraints.emplace_back(constraint);
         }
 
         /**
          * \brief Runs the swarm optimization algorithm.
          *
-         * This function iteratively updates the positions of all particles in the swarm until the maximum number of iterations is reached.
+         * This function iteratively updates the positions of all particles in the swarm until the
+         * maximum number of iterations is reached.
          */
         void run()
         {
 #pragma omp parallel default(private)
             {
-                for (IterationType it = 0; it < max_iterations; ++it)
+                while (current_iteration < max_iterations)
                 {
                     updateEveryone();
                 }
@@ -199,23 +242,23 @@ namespace Swarm
 #pragma omp for schedule(static) reduction(findBestPoint : global_best)
             for (auto &particle : particles)
             {
-                particle->updatePosition(global_best.point, a, b, current_iteration, max_iterations);
-                bool update = particle->updatePersonalBest(*fitness_function);
+                particle->updatePosition(global_best.point, a, b, current_iteration, max_iterations, constraints);
+                // We cannot check here whether a particle is inside or outside the constraints becuse each type of particles has a different behavior, so we make each particle update itself.
+                particle->updatePersonalBest(*fitness_function, constraints);
 
                 float fitness = particle->getPersonalBestValue();
                 global_best = {particle->getPosition(), fitness};
 
-                // if (positions_file.is_open())
-                // {
-
-                //     /*
-                //     positions_file << pos[0] << " "                // X
-                //                    << pos[1] << " "                // Y
-                //                    << val << " "                   // Z
-                //                    << current_iteration << " "     // Iterazione (k)
-                //                    << particle->getType() << "\n"; // Type (0=Normal, 1=Chaotic)
-                //                    */
-                // }
+                if (positions_file.is_open())
+                {
+                    for (size_t i = 0; i < dim; i++)
+                    {
+                        positions_file << particle->getPosition()[i] << " ";
+                    }
+                    positions_file << fitness_function->evaluate(particle->getPosition()) << " " // Z
+                                   << current_iteration << " "                                   // Iterazione (k)
+                                   << particle->getType() << "\n";                               // Type (0=Normal, 1=Chaotic)
+                }
             }
 
             ++current_iteration;
@@ -225,10 +268,7 @@ namespace Swarm
          * \brief Returns the best evaluated point found by the swarm.
          * \return The best evaluated point.
          */
-        EvaluatedPoint<T, dim> getGlobalBest() const
-        {
-            return global_best;
-        }
+        EvaluatedPoint<T, dim> getGlobalBest() const { return global_best; }
     };
 }
 
