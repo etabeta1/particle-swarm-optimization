@@ -82,18 +82,18 @@ namespace Swarm
      * \tparam dim The dimensionality of the points (default is 2)
      * \param focus1  The first focus of the ellipse.
      * \param focus2  The second focus of the ellipse.
-     * \param constant The maximum allowed distance from a focus.
+     * \param constant The length of the maximus axes of the ellipse.
      * \return A Constraint that checks if a point is within the ellipse.
      * \see Constraint
      *
-     * The maximum distance constraint checks if the Euclidean distance between a point and the center is less than or equal to the specified distance.
+     * The elliptic constraint checks if the a point is inside of the ellipse.
      */
     template <typename T = float, int dim = 2>
     Constraint<T, dim> makeEllipticConstraint(const Point<T, dim> &focus1, const Point<T, dim> &focus2, T constant)
     {
         return [&focus1, &focus2, constant](const Point<T, dim> &p)
         {
-            return (focus1 - p).norm2() + (focus2 - p).norm2() <= constant
+            return (focus1 - p).norm2() + (focus2 - p).norm2() <= constant;
         }
     }
 
