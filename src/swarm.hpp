@@ -206,7 +206,7 @@ namespace Swarm
                     std::make_unique<ChaoticParticle<T, dim>>(chaos_map);
                 particle->reinit(Point<T, dim>([this](size_t i)
                                                { return generate_random(a[i], b[i]); }),
-                                 *fitness_function);
+                                 initial_position, *fitness_function);
                 particles.emplace_back(std::move(particle));
             }
 

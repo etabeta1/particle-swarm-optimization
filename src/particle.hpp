@@ -35,6 +35,7 @@ namespace Swarm
     public:
         /**
          * \brief Constructs a `Particle` with default position and personal best.
+         *
          * The position and personal best are initialized to zero.
          */
         Particle() : position(T(0)), personal_best(T(0)), personal_best_value(T(0)) {}
@@ -49,9 +50,29 @@ namespace Swarm
          */
         void reinit(const Point<T, dim> &initial_position, const ObjectiveFunction<T, dim> &func)
         {
-            position = initial_position;
-            personal_best = initial_position;
-            personal_best_value = func.evaluate(initial_position);
+            reinit(initial_position, initial_position, func);
+        }
+
+        /**
+         * \brief Initializes the particle as the optimizer likes.
+         * \param initial_position The initial position of the particle.
+         * \param local_best The personal best position of the particle.
+         * \param func The fitness function to evaluate the particle's position.
+         *
+         * The function sets the position, personal best, and personal best value of the particle.
+         * The idea is to split the instantiation from the initialization so that the same class can
+         * be easily reused for multiple different optimizers that may need to
+         * initialize/reinitialize it at different stages and/or with different parameters.
+         *
+         * `initial_position` and `local_best` can be different to allow more complex initialization
+         * strategies where the initial position does not necessarily coincide with the initial
+         * personal best.
+         */
+        void reinit(const Point<T, dim> &initial_position, const Point<T, dim> &local_best, const ObjectiveFunction<T, dim> &func)
+        {
+            this->position = initial_position;
+            this->personal_best = local_best;
+            this->personal_best_value = func.evaluate(local_best);
         }
 
         /**
