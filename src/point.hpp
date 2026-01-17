@@ -361,6 +361,12 @@ namespace Swarm
             return *this;
         }
 
+        /**
+         * \brief Checks if the point is inside the box defined by two other points.
+         * \param a One corner of the box.
+         * \param b The opposite corner of the box.
+         * \return `true` if the point is inside the box, `false` otherwise
+         */
         bool isInsideBox(const Point<T, dim> &a, const Point<T, dim> &b) const
         {
             for (size_t i = 0; i < dim; i++)

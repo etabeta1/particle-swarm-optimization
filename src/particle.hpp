@@ -40,11 +40,12 @@ namespace Swarm
         Particle() : position(T(0)), personal_best(T(0)), personal_best_value(T(0)) {}
 
         /**
-         * \brief Initializes the particle as the CHOPSOOptimizer likes.
+         * \brief Initializes the particle as the optimizer likes.
          * \param initial_position The initial position of the particle.
          * \param func The fitness function to evaluate the particle's position.
          *
          * The function sets the position, personal best, and personal best value of the particle.
+         * The idea is to split the instantiation from the initialization so that the same class can be easily reused for multiple different optimizers that may need to initialize/reinitialize it at different stages and/or with different parameters.
          */
         void reinit(const Point<T, dim> &initial_position, const ObjectiveFunction<T, dim> &func)
         {
@@ -60,13 +61,17 @@ namespace Swarm
          * \param b The maximum boundary for the position.
          * \param current_iteration The current iteration of the swarm.
          * \param max_iterations The maximum number of iterations for the swarm.
+         * \param constraints A vector of constraints that the particle position must satisfy.
+         * \see Constraint
          */
         virtual void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType max_iterations, const std::vector<Constraint<T, dim>> &constraints) = 0;
 
         /**
          * \brief Returns the type of the particle.
          * \return An integer representing the type of the particle.
+         *
          * The type can be used to distinguish between different particle behaviors.
+         * This method is just used to save the type of the particle in the log files.
          */
         virtual int getType() const = 0;
 
@@ -80,7 +85,10 @@ namespace Swarm
         /**
          * \brief Updates the personal best position and value of the particle.
          * \param func The fitness function to evaluate the particle's position.
+         * \param constraints A vector of constraints that the particle position must satisfy.
          * \return `true` if the personal best was updated, `false` otherwise.
+         *
+         * \warning This method calls `handleOutOfBounds` **instead** of actually performing the update if the particle happens to be out of bounds.
          */
         virtual bool updatePersonalBest(const ObjectiveFunction<T, dim> &func, const std::vector<Constraint<T, dim>> &constraints)
         {
@@ -104,8 +112,6 @@ namespace Swarm
 
             return false;
         }
-
-        virtual bool handleOutOfBounds(const Constraint<T, dim> &first_failed_constraint, const std::vector<Constraint<T, dim>> &all_constraints) = 0;
 
         /**
          * \brief Returns a reference to the current position of the particle.
@@ -135,6 +141,21 @@ namespace Swarm
         {
             return personal_best_value;
         }
+
+    protected:
+        /**
+         * \brief Called when the particle is out of bounds.
+         * \param first_failed_constraint The first constraint that the particle failed to satisfy.
+         * \param all_constraints A vector of all constraints.
+         * \return `true` if the personal best was updated, `false` otherwise.
+         * \see Constraint
+         * \see updatePersonalBest
+         *
+         * This function is called when the particle's position violates any of the constraints. It allows derived classes to define specific behaviors for handling out-of-bounds situations.
+         *
+         * \warning This method is called by `updatePersonalBest` when the particle is out of bounds **instead** of actually performing the update.
+         */
+        virtual bool handleOutOfBounds(const Constraint<T, dim> &first_failed_constraint, const std::vector<Constraint<T, dim>> &all_constraints) = 0;
     };
 
     /**
@@ -200,12 +221,7 @@ namespace Swarm
         NormalParticle() : Particle<T, dim>(), speed(T(0)) {}
 
         /**
-         * \brief Updates the position of the normal particle.
-         * \param global_best The best position found by the swarm.
-         * \param a The minimum boundary for the position.
-         * \param b The maximum boundary for the position.
-         * \param current_iteration The current iteration of the swarm.
-         * \param max_iterations The maximum number of iterations for the swarm.
+         * \copydoc Particle::updatePosition
          *
          * This function updates the position of the normal particle based on its speed and clamps it within the boundaries.
          */
@@ -216,21 +232,22 @@ namespace Swarm
             this->position = (this->position + this->speed).clamp(a, b);
         }
 
-        bool handleOutOfBounds(const Constraint<T, dim> &, const std::vector<Constraint<T, dim>> &)
-        {
-            // If we are OOB, just do not update the personal best, the velocity will eventually point towards a valid point
-            return false;
-        }
-
         /**
-         * \brief Returns the type of the normal particle.
-         * \return An integer representing the type of the particle (0 for normal particles).
-         *
-         * The type can be used to distinguish between different particle behaviors.
+         * \copydoc Particle::getType
          */
         int getType() const override
         {
             return 0; // Normal particle type
+        }
+
+    protected:
+        /**
+         * \copydoc Particle::handleOutOfBounds
+         */
+        bool handleOutOfBounds(const Constraint<T, dim> &, const std::vector<Constraint<T, dim>> &) override
+        {
+            // If we are OOB, just do not update the personal best, the velocity will eventually point towards a valid point
+            return false;
         }
     };
 
@@ -258,33 +275,31 @@ namespace Swarm
         ChaoticParticle(const ChaosMap<T, dim> &map) : Particle<T, dim>(), chaosMap(map) {}
 
         /**
-         * \brief Updates the position of the chaotic particle.
-         * \param global_best The best position found by the swarm.
-         * \param a The minimum boundary for the position.
-         * \param b The maximum boundary for the position.
-         * \param current_iteration The current iteration of the swarm.
-         * \param max_iterations The maximum number of iterations for the swarm.
+         * \copydoc Particle::updatePosition
          *
          * This function updates the position of the chaotic particle based on the chaos map.
          */
-        void updatePosition(const Point<T, dim> &, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType max_iterations, const std::vector<Constraint<T, dim>> &) override
+        void updatePosition(const Point<T, dim> &, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType, const std::vector<Constraint<T, dim>> &) override
         {
             this->position = chaosMap.getPoint(this->position, a, b, current_iteration);
         }
 
-        bool handleOutOfBounds(const Constraint<T, dim> &, const std::vector<Constraint<T, dim>> &)
-        {
-            // If we are OOB, just do not update the personal best, the velocity will eventually point towards a valid point
-            return false;
-        }
-
         /**
-         * \brief Returns the type of the chaotic particle.
-         * \return An integer representing the type of the particle (1 for chaotic particles).
+         * \copydoc Particle::getType
          */
         int getType() const override
         {
             return 1; // Chaotic particle type
+        }
+
+    protected:
+        /**
+         * \copydoc Particle::handleOutOfBounds
+         */
+        bool handleOutOfBounds(const Constraint<T, dim> &, const std::vector<Constraint<T, dim>> &) override
+        {
+            // If we are OOB, just do not update the personal best, the velocity will eventually point towards a valid point
+            return false;
         }
     };
 };
