@@ -32,7 +32,7 @@ std::chrono::duration<double> measure(int threads, int particles)
 
     Swarm::ChaosMap<T, dim> chaosMap(f, map_a, map_b);
 
-    Swarm::CHOPSOOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, true);
+    Swarm::Optimizers::CHOPSOOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, true);
 
     auto start = std::chrono::high_resolution_clock::now();
     swarm.run();
