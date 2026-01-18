@@ -140,6 +140,176 @@ namespace Swarm
             return new_point;
         };
     };
+    namespace ChaosFactory
+    {
+        // Chebyshev ChaosMap xk+1​=cos(arccos(xk​)*k),xk​∈[−1,1]
+        template <typename T = float, int dim = 2>
+        class Chebyshev : public ChaosMap<T, dim>
+        {
+        public:
+            Chebyshev()
+                : ChaosMap<T, dim>(
+                      [](const Point<T, dim> &p, int k)
+                      {
+                          return (p.arccos() * k).cos();
+                      },
+                      Point<T, dim>(-1.f),
+                      Point<T, dim>(1.f))
+            {
+            }
+        };
+
+        // Singer ChaosMap xk+1​=μ(7.86xk​−23.31xk2​+28.75xk3​−13.302875xk4​) where mu(0,1]
+        template <typename T = float, int dim = 2>
+        class Singer : public ChaosMap<T, dim>
+        {
+            static T normalize_mu(T mu)
+            {
+                if (mu > static_cast<T>(0) && mu <= static_cast<T>(1))
+                    return mu;
+                return static_cast<T>(1);
+            }
+
+        public:
+            Singer(T mu_in = static_cast<T>(1))
+                : ChaosMap<T, dim>(
+                      [mu = normalize_mu(mu_in)](const Point<T, dim> &p, int k)
+                      {
+                          const T a = static_cast<T>(7.86);
+                          const T b = static_cast<T>(-23.31);
+                          const T c = static_cast<T>(28.75);
+                          const T d = static_cast<T>(-13.302875);
+                          return (p * a + p.pow(2) * b + p.pow(3) * c + p.pow(4) * d) * mu;
+                      },
+                      Point<T, dim>(0.f),
+                      Point<T, dim>(1.f))
+            {
+            }
+        };
+
+        // Sine ChaosMap xk+1​=a*sin(πxk​) a(0,1]
+        template <typename T = float, int dim = 2>
+        class Sine : public ChaosMap<T, dim>
+        {
+            static T normalize_a(T a)
+            {
+                if (a > static_cast<T>(0) && a <= static_cast<T>(1))
+                    return a;
+                return static_cast<T>(1);
+            }
+
+        public:
+            Sine(T a_in = static_cast<T>(1))
+                : ChaosMap<T, dim>(
+                      [a = normalize_a(a_in)](const Point<T, dim> &p, int k)
+                      {
+                          const T pi = static_cast<T>(std::numbers::pi);
+                          return (p * pi).sin() * a;
+                      },
+                      Point<T, dim>(0.f),
+                      Point<T, dim>(1.f))
+            {
+            }
+        };
+
+        // Sinusoidal ChaosMap xk+1​=axk2​sin(πxk​) a(0,1]
+        template <typename T = float, int dim = 2>
+        class Sinusoidal : public ChaosMap<T, dim>
+        {
+            static T normalize_a(T a)
+            {
+                if (a > static_cast<T>(0) && a <= static_cast<T>(1))
+                    return a;
+                return static_cast<T>(1);
+            }
+
+        public:
+            Sinusoidal(T a_in = static_cast<T>(1))
+                : ChaosMap<T, dim>(
+                      [a = normalize_a(a_in)](const Point<T, dim> &p, int k)
+                      {
+                          const T pi = static_cast<T>(std::numbers::pi);
+                          return (p * pi).sin() * p * p * a;
+                      },
+                      Point<T, dim>(0.f),
+                      Point<T, dim>(1.f))
+            {
+            }
+        };
+
+        // LogisticMap ChaosMap xk+1​=μxk​(1−xk​) mu(0,4]
+        template <typename T = float, int dim = 2>
+        class LogisticMap : public ChaosMap<T, dim>
+        {
+            static T normalize_mu(T mu)
+            {
+                if (mu > static_cast<T>(0) && mu <= static_cast<T>(4))
+                    return mu;
+                return static_cast<T>(4);
+            }
+
+        public:
+            LogisticMap(T mu_in = static_cast<T>(4))
+                : ChaosMap<T, dim>(
+                      [mu = normalize_mu(mu_in)](const Point<T, dim> &p, int k)
+                      {
+                          return (Point<T, dim>(1.f) - p) * p * mu;
+                      },
+                      Point<T, dim>(0.f),
+                      Point<T, dim>(1.f))
+            {
+            }
+        };
+        // Iterative ChaosMap xk+1​=sin(​aπ/xk​) a>0
+        template <typename T = float, int dim = 2>
+        class Iterative : public ChaosMap<T, dim>
+        {
+            static T normalize_a(T a)
+            {
+                if (a > static_cast<T>(0))
+                    return a;
+                return static_cast<T>(1);
+            }
+
+        public:
+            Iterative(T a_in = static_cast<T>(1))
+                : ChaosMap<T, dim>(
+                      [a = normalize_a(a_in)](const Point<T, dim> &p, int k)
+                      {
+                          const T pi = static_cast<T>(std::numbers::pi);
+                          return (Point<T, dim>(a * pi) / p).sin();
+                      },
+                      Point<T, dim>(-1.f),
+                      Point<T, dim>(1.f))
+            {
+            }
+        };
+        // Tent ChaosMap
+        /*
+            template <typename T = float, int dim = 2>
+        class Tent : public ChaosMap<T, dim>
+        {
+        public:
+            Tent()
+                : ChaosMap<T, dim>(
+                      [](const Point<T, dim> &p, int k)
+                      {
+                            //T mu = static_cast<T>(0.7);
+                          //if(p<mu)
+                            //return p/Point<T, dim>(0.7f);
+                          //else
+                            return (Point<T, dim>(1.f)-p)*Point<T, dim>(10/3.f);
+
+                      },
+                      Point<T, dim>(0.f),
+                      Point<T, dim>(1.f))
+            {
+            }
+        };
+        */
+
+    };
+
 };
 
 #endif
