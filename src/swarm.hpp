@@ -126,7 +126,7 @@ namespace Swarm
         /**
          * \brief Constructs a `CHOPSOOptimizer` with the given parameters.
          * \param p A unique pointer to the fitness function.
-         * \param initial_position The initial position for the normal particles.
+         * \param initial_best The initial position for the normal particles.
          * \param _a The lower bounds of the search space.
          * \param _b The upper bounds of the search space.
          * \param num_normal_particles The number of normal particles in the swarm.
@@ -140,7 +140,7 @@ namespace Swarm
          * bounds, and maximum iterations.
          */
         CHOPSOOptimizer(std::unique_ptr<ObjectiveFunction<T, dim>> &p,
-                        const Point<T, dim> &initial_position,
+                        const Point<T, dim> &initial_best,
                         const Point<T, dim> &_a,
                         const Point<T, dim> &_b,
                         size_t num_normal_particles,
@@ -150,7 +150,7 @@ namespace Swarm
                         bool save_on_file)
             : particles(0),
               fitness_function(std::move(p)),
-              global_best(initial_position, fitness_function->evaluate(initial_position)),
+              global_best(initial_best, fitness_function->evaluate(initial_best)),
               a(_a),
               b(_b),
               current_iteration(1),
@@ -165,7 +165,7 @@ namespace Swarm
                 }
             }
 
-            if (!initial_position.isInsideBox(a, b))
+            if (!initial_best.isInsideBox(a, b))
             {
                 throw std::invalid_argument("Initial position is not inside global search space");
             }
@@ -174,7 +174,9 @@ namespace Swarm
             {
                 std::unique_ptr<Particle<T, dim>> particle =
                     std::make_unique<NormalParticle<T, dim>>();
-                particle->reinit(initial_position, *fitness_function);
+                Point<T, dim> random_pos([this](size_t j)
+                                         { return generate_random(a[j], b[j]); });
+                particle->reinit(random_pos, initial_best, *fitness_function);
                 particles.emplace_back(std::move(particle));
             }
 
@@ -182,9 +184,9 @@ namespace Swarm
             {
                 std::unique_ptr<Particle<T, dim>> particle =
                     std::make_unique<ChaoticParticle<T, dim>>(chaos_map);
-                particle->reinit(Point<T, dim>([this](size_t i)
-                                               { return generate_random(a[i], b[i]); }),
-                                 initial_position, *fitness_function);
+                Point<T, dim> random_pos([this](size_t j)
+                                         { return generate_random(a[j], b[j]); });
+                particle->reinit(random_pos, initial_best, *fitness_function);
                 particles.emplace_back(std::move(particle));
             }
 
@@ -227,12 +229,9 @@ namespace Swarm
          */
         void run()
         {
-#pragma omp parallel default(private)
+            while (current_iteration < max_iterations)
             {
-                while (current_iteration < max_iterations)
-                {
-                    updateEveryone();
-                }
+                updateEveryone();
             }
         }
 
@@ -241,29 +240,41 @@ namespace Swarm
          */
         void updateEveryone()
         {
-#pragma omp for schedule(static) reduction(findBestPoint : global_best)
-            for (auto &particle : particles)
+            EvaluatedPoint<T, dim> old_global_best = global_best;
+            EvaluatedPoint<T, dim> best_in_iteration = old_global_best;
+
+#pragma omp parallel for default(shared) schedule(static) reduction(findBestPoint : best_in_iteration)
+            for (size_t i = 0; i < particles.size(); ++i)
             {
-                particle->updatePosition(global_best.point, a, b, current_iteration, max_iterations, constraints);
+                auto &particle = particles[i];
+                particle->updatePosition(old_global_best.point, a, b, current_iteration, max_iterations, constraints);
                 // We cannot check here whether a particle is inside or outside the constraints
                 // because each type of particles has a different behavior, so we make each particle
                 // update itself.
                 particle->updatePersonalBest(*fitness_function, constraints);
 
-                float fitness = particle->getPersonalBestValue();
-
-                global_best = {particle->getPersonalBestPosition(), fitness};
-
                 if (positions_file.is_open())
                 {
-                    for (size_t i = 0; i < dim; i++)
+#pragma omp critical
                     {
-                        positions_file << particle->getPosition()[i] << " ";
+                        for (size_t j = 0; j < dim; j++)
+                        {
+                            positions_file << particle->getPosition()[j] << " ";
+                        }
+                        positions_file << fitness_function->evaluate(particle->getPosition()) << " " // Z
+                                       << current_iteration << " "                                   // Iterazione (k)
+                                       << particle->getType() << "\n";                               // Type (0=Normal, 1=Chaotic)
                     }
-                    positions_file << fitness_function->evaluate(particle->getPosition()) << " " // Z
-                                   << current_iteration << " "                                   // Iterazione (k)
-                                   << particle->getType() << "\n";                               // Type (0=Normal, 1=Chaotic)
                 }
+
+                float fitness = particles[i]->getPersonalBestValue();
+                best_in_iteration = {particles[i]->getPersonalBestPosition(), fitness};
+            }
+
+            // Update global best only if we found something better (monotonic improvement)
+            if (best_in_iteration.value < global_best.value)
+            {
+                global_best = best_in_iteration;
             }
 
             ++current_iteration;

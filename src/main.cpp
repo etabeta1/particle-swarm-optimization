@@ -26,13 +26,13 @@ std::chrono::duration<double> measure(int threads, int particles)
     Swarm::MapFunction<T, dim> f = [](const Swarm::Point<T, dim> &p, int k)
     { return (p.arccos() * k).cos(); };
 
-    Swarm::Point<T, dim> a(-10.f);
-    Swarm::Point<T, dim> b(+10.f);
-    Swarm::Point<T, dim> initial_pos(5.f);
+    Swarm::Point<T, dim> a(-1.f);
+    Swarm::Point<T, dim> b(+1.f);
+    Swarm::Point<T, dim> initial_best(.5f);
 
     Swarm::ChaosMap<T, dim> chaosMap(f, map_a, map_b);
 
-    Swarm::CHOPSOOptimizer<T, dim> swarm(fitness, initial_pos, a, b, nN, nC, chaosMap, max_iterations, true);
+    Swarm::CHOPSOOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, true);
 
     auto start = std::chrono::high_resolution_clock::now();
     swarm.run();

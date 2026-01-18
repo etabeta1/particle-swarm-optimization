@@ -24,16 +24,6 @@ namespace Swarm
 
         EvaluatedPoint<T, dim> personal_best;
 
-        // /**
-        //  * \brief The personal best position of the particle.
-        //  */
-        // Point<T, dim> personal_best;
-
-        // /**
-        //  * \brief The personal best value of the particle.
-        //  */
-        // float personal_best_value;
-
     public:
         /**
          * \brief Constructs a `Particle` with default position and personal best.
@@ -119,6 +109,7 @@ namespace Swarm
             {
                 if (!(c(this->position)))
                 {
+                    std::cout << "OOB" << std::endl;
                     return handleOutOfBounds(c, constraints);
                 }
             }
@@ -207,6 +198,8 @@ namespace Swarm
          */
         float c2 = 2.5f;
 
+        float r1, r2;
+
         /**
          * \brief Updates the speed of the normal particle.
          * \param global_best The best position found by the swarm.
@@ -225,8 +218,11 @@ namespace Swarm
 
             float w = 0.9f - (0.5f * static_cast<float>(current_iteration) / static_cast<float>(max_iterations));
 
-            float k1 = generate_random(0.0f, 1.0f) * c1;
-            float k2 = generate_random(0.0f, 1.0f) * c2;
+            // float k1 = generate_random(0.0f, 1.0f) * c1;
+            // float k2 = generate_random(0.0f, 1.0f) * c2;
+
+            float k1 = c1 * r1;
+            float k2 = c2 * r2;
 
             Point<T, dim> inertia = speed * w;
             Point<T, dim> cognitive = (this->personal_best.point - this->position) * k1;
@@ -241,7 +237,7 @@ namespace Swarm
          *
          * The position and speed are initialized to zero.
          */
-        NormalParticle() : Particle<T, dim>(), speed(T(0)) {}
+        NormalParticle() : Particle<T, dim>(), speed(T(0)), r1(generate_random(0.f, 1.f)), r2(generate_random(0.f, 1.f)) {}
 
         /**
          * \copydoc Particle::updatePosition
@@ -269,6 +265,7 @@ namespace Swarm
          */
         bool handleOutOfBounds(const Constraint<T, dim> &, const std::vector<Constraint<T, dim>> &) override
         {
+            std::cout << "Normal OOB" << std::endl;
             // If we are OOB, just do not update the personal best, the velocity will eventually point towards a valid point
             return false;
         }
@@ -321,6 +318,7 @@ namespace Swarm
          */
         bool handleOutOfBounds(const Constraint<T, dim> &, const std::vector<Constraint<T, dim>> &) override
         {
+            std::cout << "Chaotic OOB" << std::endl;
             // If we are OOB, just do not update the personal best, the velocity will eventually point towards a valid point
             return false;
         }
