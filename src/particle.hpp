@@ -22,15 +22,17 @@ namespace Swarm
          */
         Point<T, dim> position;
 
-        /**
-         * \brief The personal best position of the particle.
-         */
-        Point<T, dim> personal_best;
+        EvaluatedPoint<T, dim> personal_best;
 
-        /**
-         * \brief The personal best value of the particle.
-         */
-        float personal_best_value;
+        // /**
+        //  * \brief The personal best position of the particle.
+        //  */
+        // Point<T, dim> personal_best;
+
+        // /**
+        //  * \brief The personal best value of the particle.
+        //  */
+        // float personal_best_value;
 
     public:
         /**
@@ -38,7 +40,7 @@ namespace Swarm
          *
          * The position and personal best are initialized to zero.
          */
-        Particle() : position(T(0)), personal_best(T(0)), personal_best_value(T(0)) {}
+        Particle() : position(T(0)), personal_best(T(0), T(0)) {}
 
         /**
          * \brief Initializes the particle as the optimizer likes.
@@ -71,8 +73,7 @@ namespace Swarm
         void reinit(const Point<T, dim> &initial_position, const Point<T, dim> &local_best, const ObjectiveFunction<T, dim> &func)
         {
             this->position = initial_position;
-            this->personal_best = local_best;
-            this->personal_best_value = func.evaluate(local_best);
+            this->personal_best = {local_best, func.evaluate(local_best)};
         }
 
         /**
@@ -123,10 +124,11 @@ namespace Swarm
             }
 
             float current_value = func.evaluate(this->position);
-            if (current_value < this->personal_best_value)
+
+            // Minimization
+            if (current_value < this->personal_best.value)
             {
-                this->personal_best_value = current_value;
-                this->personal_best = this->position;
+                this->personal_best = {this->position, current_value};
 
                 return true;
             }
@@ -149,9 +151,9 @@ namespace Swarm
          * \return A reference to the `Point` representing the particle's personal best position.
          * \see Point
          */
-        Point<T, dim> &getPersonalBest()
+        Point<T, dim> &getPersonalBestPosition()
         {
-            return personal_best;
+            return personal_best.point;
         }
 
         /**
@@ -160,7 +162,7 @@ namespace Swarm
          */
         float getPersonalBestValue()
         {
-            return personal_best_value;
+            return personal_best.value;
         }
 
     protected:
@@ -227,7 +229,7 @@ namespace Swarm
             float k2 = generate_random(0.0f, 1.0f) * c2;
 
             Point<T, dim> inertia = speed * w;
-            Point<T, dim> cognitive = (this->personal_best - this->position) * k1;
+            Point<T, dim> cognitive = (this->personal_best.point - this->position) * k1;
             Point<T, dim> social = (global_best - this->position) * k2;
 
             this->speed = inertia + cognitive + social;

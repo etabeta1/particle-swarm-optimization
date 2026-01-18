@@ -43,28 +43,6 @@
             initializer(omp_priv = {                                                                       \
                             Swarm::EvaluatedPoint<T, dim>({Swarm::Point<T, dim>(T(0)),                     \
                                                            std::numeric_limits<T>::infinity()})})))
-namespace Swarm
-{
-    /**
-     * \brief Structure representing a point and its evaluated value.
-     * \tparam T The type used to store the coordinates (defaults to `float`).
-     * \tparam dim The number of dimensions for the vector (defaults to 2).
-     *
-     * This structure holds a point in the search space along with its corresponding fitness value.
-     */
-    template <typename T = float, int dim = 2>
-    struct EvaluatedPoint
-    {
-        /**
-         * \brief The point in the search space.
-         */
-        Point<T, dim> point;
-        /**
-         * \brief The value of the fitness function at the point.
-         */
-        float value;
-    };
-}
 
 /**
  * \brief Function to perform reduction for finding the better evaluated point.
@@ -273,7 +251,8 @@ namespace Swarm
                 particle->updatePersonalBest(*fitness_function, constraints);
 
                 float fitness = particle->getPersonalBestValue();
-                global_best = {particle->getPosition(), fitness};
+
+                global_best = {particle->getPersonalBestPosition(), fitness};
 
                 if (positions_file.is_open())
                 {
