@@ -6,32 +6,69 @@
 #include <vector>
 #include <iostream>
 
+/**
+ * @brief Status of a test
+ */
 enum Status
 {
+    /**
+     * @brief Test passed
+     */
     PASS,
+    /**
+     * @brief Test failed
+     */
     ERR
 };
 
+/**
+ * @brief Structure representing a test
+ */
 struct Test
 {
+    /**
+     * @brief Name of the test
+     */
     std::string name;
+
+    /**
+     * @brief Body of the test
+     */
     std::function<Status()> body;
 };
 
+/**
+ * @brief Manager for tests
+ */
 class TestManager
 {
 private:
+    /**
+     * @brief List of tests
+     */
     std::vector<Test> tests;
 
 public:
+    /**
+     * @brief Construct a new Test Manager object
+     */
     TestManager() {}
 
+    /**
+     * @brief Add a test to the manager
+     * @param name Name of the test
+     * @param body Body of the test
+     */
     void addTest(const std::string &name, const std::function<Status()> &body)
     {
         Test t{name, body};
         tests.emplace_back(t);
     }
 
+    /**
+     * @brief Run all tests
+     * @return Status Overall status (`PASS` if all tests passed, `ERR` otherwise)
+     */
     Status runAll()
     {
         size_t pass = 0, err = 0;
