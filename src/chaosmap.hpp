@@ -173,7 +173,7 @@ namespace Swarm
         public:
             Singer(T mu_in = static_cast<T>(1))
                 : ChaosMap<T, dim>(
-                      [mu = normalize_mu(mu_in)](const Point<T, dim> &p, int k)
+                      [mu = normalize_mu(mu_in)](const Point<T, dim> &p, int)
                       {
                           const T a = static_cast<T>(7.86);
                           const T b = static_cast<T>(-23.31);
@@ -201,7 +201,7 @@ namespace Swarm
         public:
             Sine(T a_in = static_cast<T>(1))
                 : ChaosMap<T, dim>(
-                      [a = normalize_a(a_in)](const Point<T, dim> &p, int k)
+                      [a = normalize_a(a_in)](const Point<T, dim> &p, int)
                       {
                           const T pi = static_cast<T>(std::numbers::pi);
                           return (p * pi).sin() * a;
@@ -226,7 +226,7 @@ namespace Swarm
         public:
             Sinusoidal(T a_in = static_cast<T>(1))
                 : ChaosMap<T, dim>(
-                      [a = normalize_a(a_in)](const Point<T, dim> &p, int k)
+                      [a = normalize_a(a_in)](const Point<T, dim> &p, int)
                       {
                           const T pi = static_cast<T>(std::numbers::pi);
                           return (p * pi).sin() * p * p * a;
@@ -251,7 +251,7 @@ namespace Swarm
         public:
             LogisticMap(T mu_in = static_cast<T>(4))
                 : ChaosMap<T, dim>(
-                      [mu = normalize_mu(mu_in)](const Point<T, dim> &p, int k)
+                      [mu = normalize_mu(mu_in)](const Point<T, dim> &p, int)
                       {
                           return (Point<T, dim>(1.f) - p) * p * mu;
                       },
@@ -274,7 +274,7 @@ namespace Swarm
         public:
             Iterative(T a_in = static_cast<T>(1))
                 : ChaosMap<T, dim>(
-                      [a = normalize_a(a_in)](const Point<T, dim> &p, int k)
+                      [a = normalize_a(a_in)](const Point<T, dim> &p, int)
                       {
                           const T pi = static_cast<T>(std::numbers::pi);
                           return (Point<T, dim>(a * pi) / p).sin();
