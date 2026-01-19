@@ -15,7 +15,7 @@
 template <typename T = float>
 inline T generate_random(T a, T b)
 {
-    static std::mt19937 generator(std::random_device{}());
+    static std::mt19937 generator(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 
     if constexpr (std::is_integral_v<T>)
     {

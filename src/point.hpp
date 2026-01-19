@@ -361,7 +361,13 @@ namespace Swarm
             return *this;
         }
 
-        bool isInsideBox(const Point<T, dim> &a, const Point<T, dim> &a) const
+        /**
+         * \brief Checks if the point is inside the box defined by two other points.
+         * \param a One corner of the box.
+         * \param b The opposite corner of the box.
+         * \return `true` if the point is inside the box, `false` otherwise
+         */
+        bool isInsideBox(const Point<T, dim> &a, const Point<T, dim> &b) const
         {
             for (size_t i = 0; i < dim; i++)
             {
@@ -378,6 +384,26 @@ namespace Swarm
          * \brief The array storing the coordinates of the point.
          */
         T coordinates[dim];
+    };
+
+    /**
+     * \brief Structure representing a point and its evaluated value.
+     * \tparam T The type used to store the coordinates (defaults to `float`).
+     * \tparam dim The number of dimensions for the vector (defaults to 2).
+     *
+     * This structure holds a point in the search space along with its corresponding fitness value.
+     */
+    template <typename T = float, int dim = 2>
+    struct EvaluatedPoint
+    {
+        /**
+         * \brief The point in the search space.
+         */
+        Point<T, dim> point;
+        /**
+         * \brief The value of the fitness function at the point.
+         */
+        float value;
     };
 };
 

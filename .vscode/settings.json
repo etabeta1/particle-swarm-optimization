@@ -1,4 +1,4 @@
 {
     "editor.formatOnSave": true,
-    "cmake.ignoreCMakeListsMissing": true
+    "cmake.ignoreCMakeListsMissing": true,
 }
