@@ -25,7 +25,7 @@ all: test docs dist
 test:
 	mkdir -p $(BINARY_FOLDER)
 	for test_file in $(TEST_FOLDER)/*.cpp; do \
-		$(CXX) -o $(BINARY_FOLDER)/$$(basename $$test_file .cpp) $$test_file $(TEST_FLAGS); \
+		$(CXX) -o $(BINARY_FOLDER)/$$(basename $$test_file .cpp) $$test_file $(TEST_FLAGS) && \
 		$(BINARY_FOLDER)/$$(basename $$test_file .cpp); \
 	done
 
