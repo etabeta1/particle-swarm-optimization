@@ -323,6 +323,58 @@ namespace Swarm
             return false;
         }
     };
+
+    
+    /**
+     * \brief Definition of the SA_normal particle.
+     * \tparam T The type used to store the coordinates (defaults to `float`).
+     * \tparam dim The number of dimensions for the vector (defaults to 2).
+     *
+     * This class represents a normal particle that follows the PSO logic.
+     */
+    template <typename T = float, int dim = 2>
+    class SANormalParticle : public NormalParticle<T, dim>
+    {
+    private:
+        float temperature;
+
+    public:
+        /**
+         * \brief Constructs a `NormalParticle` with default position and speed.
+         *
+         * The position and speed are initialized to zero.
+         */
+        SANormalParticle(float initial_temperature) : NormalParticle<T, dim>(), temperature(initial_temperature) {}
+
+        /**
+         * \copydoc Particle::updatePosition
+         *
+         * This function updates the position of the normal particle following the simulated annealing logic using its speed and clamps it within the boundaries.
+         */
+        void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType max_iterations, const std::vector<Constraint<T, dim>> &) override
+        {
+            updateSpeed(global_best, current_iteration, max_iterations);
+
+            float current_value = func.evaluate(this->position);
+            float next_value = func.evaluate(this->position + this->speed);
+            
+            if(new_value>=current_value){
+                this->position = (this->position + this->speed).clamp(a, b);
+
+            } else {
+                
+                float acceptance_prob = exp((current_value - next_value) / temperature);
+                float random_value = generate_random(0.0f, 1.0f);
+            
+                if(random_value < acceptance_prob){
+                    this->position = (this->position + this->speed).clamp(a, b);
+                }
+    
+            }
+
+            temperature *= 0.95f;
+        }
+    };
 };
 
 #endif
