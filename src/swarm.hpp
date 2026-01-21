@@ -345,8 +345,39 @@ namespace Swarm
              * \param num_chaotic_particles The number of chaotic particles in the swarm.
              * \param chaos_map The chaos map used for chaotic particles.
              * \param _max_iterations The maximum number of iterations for the swarm.
-             * \param rep_size Repository size of Global Best and Personal Best.
-             * \param save_on_file Flag indicating whether to save particle positions to a file.
+             * \throws std::invalid_argument if the initial position is not inside the search space.
+             *
+             * This constructor initializes the swarm with the provided fitness function, search space
+             * bounds, and maximum iterations.
+             */
+            GENETICOptimizer(std::unique_ptr<ObjectiveFunction<T, dim>> &p,
+                             const Point<T, dim> &initial_best,
+                             const Point<T, dim> &_a,
+                             const Point<T, dim> &_b,
+                             size_t num_normal_particles,
+                             size_t num_chaotic_particles,
+                             const ChaosMap<T, dim> &chaos_map,
+                             IterationType _max_iterations)
+                : CHOPSOOptimizer<T, dim>(p,
+                                          initial_best,
+                                          _a,
+                                          _b,
+                                          num_normal_particles,
+                                          num_chaotic_particles,
+                                          chaos_map,
+                                          _max_iterations) {};
+
+            /**
+             * \brief Constructs a `GENETICOptimizer` with the given parameters.
+             * \param p A unique pointer to the fitness function.
+             * \param initial_best The initial position for the normal particles.
+             * \param _a The lower bounds of the search space.
+             * \param _b The upper bounds of the search space.
+             * \param num_normal_particles The number of normal particles in the swarm.
+             * \param num_chaotic_particles The number of chaotic particles in the swarm.
+             * \param chaos_map The chaos map used for chaotic particles.
+             * \param _max_iterations The maximum number of iterations for the swarm.
+             * \param output_filename The name of the output file to save particle positions.
              * \throws std::invalid_argument if the initial position is not inside the search space.
              *
              * This constructor initializes the swarm with the provided fitness function, search space
@@ -360,15 +391,16 @@ namespace Swarm
                              size_t num_chaotic_particles,
                              const ChaosMap<T, dim> &chaos_map,
                              IterationType _max_iterations,
-                             bool save_on_file) : CHOPSOOptimizer<T, dim>(p,
-                                                                          initial_best,
-                                                                          _a,
-                                                                          _b,
-                                                                          num_normal_particles,
-                                                                          num_chaotic_particles,
-                                                                          chaos_map,
-                                                                          _max_iterations,
-                                                                          save_on_file) {};
+                             std::string output_filename)
+                : CHOPSOOptimizer<T, dim>(p,
+                                          initial_best,
+                                          _a,
+                                          _b,
+                                          num_normal_particles,
+                                          num_chaotic_particles,
+                                          chaos_map,
+                                          _max_iterations,
+                                          output_filename) {};
 
             /**
              * \brief Updates the positions of all particles in the swarm and, if enabled, logs their positions to a file.
