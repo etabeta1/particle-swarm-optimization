@@ -324,7 +324,6 @@ namespace Swarm
         }
     };
 
-    
     /**
      * \brief Definition of the SA_normal particle.
      * \tparam T The type used to store the coordinates (defaults to `float`).
@@ -346,6 +345,10 @@ namespace Swarm
          */
         SANormalParticle(float initial_temperature) : NormalParticle<T, dim>(), temperature(initial_temperature) {}
 
+        void setTemperature(float new_t)
+        {
+            this->temperature = new_t;
+        }
         /**
          * \copydoc Particle::updatePosition
          *
@@ -356,23 +359,23 @@ namespace Swarm
             updateSpeed(global_best, current_iteration, max_iterations);
 
             float current_value = func.evaluate(this->position);
-            float next_value = func.evaluate(this->position + this->speed);
-            
-            if(new_value>=current_value){
-                this->position = (this->position + this->speed).clamp(a, b);
+            float next_value = func.evaluate((this->position + this->speed).clamp(a, b));
 
-            } else {
-                
+            if (new_value >= current_value)
+            {
+                this->position = (this->position + this->speed).clamp(a, b);
+            }
+            else
+            {
+
                 float acceptance_prob = exp((current_value - next_value) / temperature);
                 float random_value = generate_random(0.0f, 1.0f);
-            
-                if(random_value < acceptance_prob){
+
+                if (random_value < acceptance_prob)
+                {
                     this->position = (this->position + this->speed).clamp(a, b);
                 }
-    
             }
-
-            temperature *= 0.95f;
         }
     };
 };

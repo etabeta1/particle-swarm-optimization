@@ -51,34 +51,38 @@ std::chrono::duration<double> measure(int threads, int particles)
     return elapsed;
 }
 
+// int main()
+// {
+
+//     // std::cout << "Enter the number of iterations" << std::endl;
+//     // std::cin >> max_iterations;
+//     // std::cout << "Enter the number of normal particles." << std::endl;
+//     // std::cin >> nN;
+//     // std::cout << "\n"
+//     //           << "Enter the number of chaotic particles." << std::endl;
+//     // std::cin >> nC;
+
+//     measure(1, 100);
+
+//     // std::ofstream measurements;
+//     // measurements.open("time.txt");
+
+//     // measurements << "Threads,T10k,T40k,T160k" << std::endl;
+
+//     // for (int i = 1; i <= 28; i++)
+//     // {
+//     //     measurements << i << ",";
+
+//     //     std::chrono::duration<double> t10k = measure(i, 10000);
+//     //     std::chrono::duration<double> t20k = measure(i, 40000);
+//     //     std::chrono::duration<double> t40k = measure(i, 160000);
+
+//     //     measurements << t10k << "," << t20k << "," << t40k << std::endl;
+//     // }
+
+//     // measurements.close();
+// }
+
 int main()
 {
-
-    // std::cout << "Enter the number of iterations" << std::endl;
-    // std::cin >> max_iterations;
-    // std::cout << "Enter the number of normal particles." << std::endl;
-    // std::cin >> nN;
-    // std::cout << "\n"
-    //           << "Enter the number of chaotic particles." << std::endl;
-    // std::cin >> nC;
-
-    measure(1, 100);
-
-    // std::ofstream measurements;
-    // measurements.open("time.txt");
-
-    // measurements << "Threads,T10k,T40k,T160k" << std::endl;
-
-    // for (int i = 1; i <= 28; i++)
-    // {
-    //     measurements << i << ",";
-
-    //     std::chrono::duration<double> t10k = measure(i, 10000);
-    //     std::chrono::duration<double> t20k = measure(i, 40000);
-    //     std::chrono::duration<double> t40k = measure(i, 160000);
-
-    //     measurements << t10k << "," << t20k << "," << t40k << std::endl;
-    // }
-
-    // measurements.close();
 }
