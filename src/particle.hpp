@@ -375,7 +375,7 @@ namespace Swarm
             float current_value = this->objective_function->evaluate(this->position);
             float next_value = this->objective_function->evaluate((this->position + this->speed).clamp(a, b));
 
-            if (next_value >= current_value)
+            if (next_value <= current_value)
             {
                 this->position = (this->position + this->speed).clamp(a, b);
             }

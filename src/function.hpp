@@ -152,7 +152,7 @@ namespace Swarm
             T part_sum_1 = 0.0f;
             T part_sum_2 = 0.0f;
             part_sum_1 = p.squareNorm2();
-            part_sum_2 = ((2 * M_PI) * p).cos().norm1();
+            part_sum_2 = (p * static_cast<T>(2 * M_PI)).cos().norm1();
             sum = -20 * exp(-0.2 * sqrt(part_sum_1 / dim)) - exp(part_sum_2 / dim) + 20 + exp(1);
             return sum;
         }

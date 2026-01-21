@@ -19,7 +19,7 @@ std::chrono::duration<double> measure(int threads, int particles)
     int max_iterations = 100;
 
     omp_set_num_threads(threads);
-    std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_shared<Swarm::DropwaveFunction<T, dim>>();
+    std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_shared<Swarm::AckleyFunction<T, dim>>();
 
     Swarm::Point<T, dim> map_a(-1.f);
     Swarm::Point<T, dim> map_b(1.f);
