@@ -305,24 +305,16 @@ namespace Swarm
             float cooling_rate;
 
         public:
-            void setSAEvolutionParameters(float initial_temp, float alpha)
-            {
-                this->current_temperature = initial_temp;
-                this->cooling_rate = alpha;
-            }
-
             /**
-             * \brief Applica il raffreddamento a tutte le particelle SANormalParticle.
+             * \brief Updates the temperature of the swarm and propagates it to all SA particles.
              */
             void updateSwarmTemperature()
             {
-                // Riduciamo la temperatura globale dell'ottimizzatore
+
                 this->current_temperature *= this->cooling_rate;
 
-                // Distribuiamo la nuova temperatura alle particelle SANormalParticle
                 for (auto &p : this->particles)
                 {
-                    // Usiamo dynamic_cast per identificare le particelle SA nel vettore polimorfico
                     auto sa_p = dynamic_cast<SANormalParticle<T, dim> *>(p.get());
                     if (sa_p)
                     {
@@ -379,20 +371,23 @@ namespace Swarm
 
         public:
             /**
-             * \brief Constructs a `CHOPSOOptimizer` with the given parameters.
-             * \param p A unique pointer to the fitness function.
-             * \param initial_best The initial position for the normal particles.
-             * \param _a The lower bounds of the search space.
-             * \param _b The upper bounds of the search space.
-             * \param num_normal_particles The number of normal particles in the swarm.
-             * \param num_chaotic_particles The number of chaotic particles in the swarm.
-             * \param chaos_map The chaos map used for chaotic particles.
-             * \param _max_iterations The maximum number of iterations for the swarm.
-             * \param save_on_file Flag indicating whether to save particle positions to a file.
-             * \throws std::invalid_argument if the initial position is not inside the search space.
+             * @brief Construct a new SAOptimizer object
+             *
+             * @param p A shared pointer to the fitness function.
+             * @param initial_best The initial position for the normal particles.
+             * @param _a The lower bounds of the search space.
+             * @param _b  The upper bounds of the search space.
+             * @param num_normal_particles The number of normal particles in the swarm.
+             * @param num_chaotic_particles The number of chaotic particles in the swarm.
+             * @param chaos_map The chaos map used for chaotic particles.
+             * @param _max_iterations The maximum number of iterations for the swarm.
+             * @param initial_temperature The initial temperature for the simulated annealing process.
+             * @param alpha The cooling rate for the simulated annealing process.
+             * @param save_on_file Flag indicating whether to save particle positions to a file.
+             * @throws std::invalid_argument if the initial position is not inside the search space.
              *
              * This constructor initializes the swarm with the provided fitness function, search space
-             * bounds, and maximum iterations.
+             * bounds, maximum iterations, and simulated annealing parameters.
              */
             SAOptimizer(std::shared_ptr<ObjectiveFunction<T, dim>> &p,
                         const Point<T, dim> &initial_best,

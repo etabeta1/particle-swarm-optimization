@@ -336,8 +336,14 @@ namespace Swarm
     class SANormalParticle : public NormalParticle<T, dim>
     {
     private:
+        /**
+         * \brief The current temperature of the particle.
+         */
         float temperature;
 
+        /**
+         * \brief A shared pointer to the objective function used to evaluate the particle's position.
+         */
         std::shared_ptr<ObjectiveFunction<T, dim>> objective_function;
 
     public:
@@ -348,6 +354,10 @@ namespace Swarm
          */
         SANormalParticle(float initial_temperature, std::shared_ptr<ObjectiveFunction<T, dim>> _objective_function) : NormalParticle<T, dim>(), temperature(initial_temperature), objective_function(_objective_function) {}
 
+        /**
+         * \brief Sets the temperature of the particle.
+         * \param new_t The new temperature to set.
+         */
         void setTemperature(float new_t)
         {
             this->temperature = new_t;
