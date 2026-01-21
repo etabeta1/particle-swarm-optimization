@@ -19,7 +19,7 @@ std::chrono::duration<double> measure(int threads, int particles)
     int max_iterations = 100;
 
     omp_set_num_threads(threads);
-    std::unique_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_unique<Swarm::DropwaveFunction<T, dim>>();
+    std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_shared<Swarm::DropwaveFunction<T, dim>>();
 
     Swarm::Point<T, dim> map_a(-1.f);
     Swarm::Point<T, dim> map_b(1.f);
@@ -32,7 +32,8 @@ std::chrono::duration<double> measure(int threads, int particles)
 
     Swarm::ChaosMap<T, dim> chaosMap(f, map_a, map_b);
 
-    Swarm::Optimizers::CHOPSOOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, true);
+    Swarm::Optimizers::SAOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, 395.0f,
+                                                 0.95f, true);
 
     auto start = std::chrono::high_resolution_clock::now();
     swarm.run();
@@ -85,4 +86,7 @@ std::chrono::duration<double> measure(int threads, int particles)
 
 int main()
 {
+    measure(1, 1000);
+
+    return 0;
 }
