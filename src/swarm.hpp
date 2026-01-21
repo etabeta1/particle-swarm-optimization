@@ -9,6 +9,7 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+#include <random>
 
 #include "chaosmap.hpp"
 #include "constraint.hpp"
@@ -79,7 +80,7 @@ namespace Swarm
         template <typename T = float, int dim = 2>
         class CHOPSOOptimizer
         {
-        private:
+        protected:
             /**
              * \brief The particles in the swarm.
              */
@@ -230,7 +231,7 @@ namespace Swarm
              * This function iteratively updates the positions of all particles in the swarm until the
              * maximum number of iterations is reached.
              */
-            void run()
+            virtual void run()
             {
                 while (current_iteration < max_iterations)
                 {
@@ -241,7 +242,7 @@ namespace Swarm
             /**
              * \brief Updates the positions of all particles in the swarm and, if enabled, logs their positions to a file.
              */
-            void updateEveryone()
+            virtual void updateEveryone()
             {
                 EvaluatedPoint<T, dim> old_global_best = global_best;
                 EvaluatedPoint<T, dim> best_in_iteration = old_global_best;
@@ -288,6 +289,251 @@ namespace Swarm
              * \return The best evaluated point.
              */
             EvaluatedPoint<T, dim> getGlobalBest() const { return global_best; }
+        };
+
+        /**
+         * \brief Definition of the swarm optimization algorithm.
+         * \tparam T The type used to store the coordinates (defaults to `float`).
+         * \tparam dim The number of dimensions for the vector (defaults to 2).
+         *
+         * This class manages a swarm of particles and performs optimization using the CHOPSO algorithm.
+         */
+        template <typename T = float, int dim = 2>
+        class GENETICOptimizer : protected CHOPSOOptimizer<T, dim>
+        {
+
+        public:
+            /**
+             * \brief Constructs a `GENETICOptimizer` with the given parameters.
+             * \param p A unique pointer to the fitness function.
+             * \param initial_best The initial position for the normal particles.
+             * \param _a The lower bounds of the search space.
+             * \param _b The upper bounds of the search space.
+             * \param num_normal_particles The number of normal particles in the swarm.
+             * \param num_chaotic_particles The number of chaotic particles in the swarm.
+             * \param chaos_map The chaos map used for chaotic particles.
+             * \param _max_iterations The maximum number of iterations for the swarm.
+             * \param rep_size Repository size of Global Best and Personal Best.
+             * \param save_on_file Flag indicating whether to save particle positions to a file.
+             * \throws std::invalid_argument if the initial position is not inside the search space.
+             *
+             * This constructor initializes the swarm with the provided fitness function, search space
+             * bounds, and maximum iterations.
+             */
+            GENETICOptimizer(std::unique_ptr<ObjectiveFunction<T, dim>> &p,
+                             const Point<T, dim> &initial_best,
+                             const Point<T, dim> &_a,
+                             const Point<T, dim> &_b,
+                             size_t num_normal_particles,
+                             size_t num_chaotic_particles,
+                             const ChaosMap<T, dim> &chaos_map,
+                             IterationType _max_iterations,
+                             bool save_on_file) : CHOPSOOptimizer<T,dim>(p,
+                                                                  initial_best,
+                                                                  _a,
+                                                                  _b,
+                                                                  num_normal_particles,
+                                                                  num_chaotic_particles,
+                                                                  chaos_map,
+                                                                  _max_iterations,
+                                                                  save_on_file) {};
+
+            /**
+             * \brief Updates the positions of all particles in the swarm and, if enabled, logs their positions to a file.
+             */
+            using super = CHOPSOOptimizer<T,dim>;
+             void updateEveryone() override
+            {   
+                super::updateEveryone();
+                mutateGlobalBest();
+            }
+            void run() override{
+                super::run();
+            }
+            void mutateGlobalBest()
+            {
+                // Initialize with dummy values
+                EvaluatedPoint<T, dim> uniform_mutation = {Point<T, dim>(T(0)), std::numeric_limits<float>::infinity()};
+                EvaluatedPoint<T, dim> gaussian_mutation = {Point<T, dim>(T(0)), std::numeric_limits<float>::infinity()};
+                EvaluatedPoint<T, dim> non_uniform_mutation = {Point<T, dim>(T(0)), std::numeric_limits<float>::infinity()};
+                EvaluatedPoint<T, dim> dimension_wise_mutation = {Point<T, dim>(T(0)), std::numeric_limits<float>::infinity()};
+                EvaluatedPoint<T, dim> opposition_based_mutation = {Point<T, dim>(T(0)), std::numeric_limits<float>::infinity()};
+
+// Parallelize the 5 independent mutations
+#pragma omp parallel sections
+                {
+#pragma omp section
+                    uniform_mutation = uniformMutation();
+
+#pragma omp section
+                    gaussian_mutation = GaussianMutation();
+
+#pragma omp section
+                    non_uniform_mutation = nonUniformMutation();
+
+#pragma omp section
+                    dimension_wise_mutation = dimensionWiseMutation();
+
+#pragma omp section
+                    opposition_based_mutation = oppositionBasedMutation();
+                }
+
+                // Funzione lambda per controllare se un punto soddisfa tutti i constraints
+                auto satisfiesConstraints = [this](const Point<T, dim> &point) -> bool
+                {
+                    for (const auto &constraint : super::constraints)
+                    {
+                        if (!constraint(point))
+                        {
+                            return false; // Violato un constraint
+                        }
+                    }
+                    return true; // Soddisfa tutti i constraints
+                };
+
+                // Verifica constraints e raccogli candidati validi
+                std::vector<EvaluatedPoint<T, dim>> valid_mutations;
+
+                if (satisfiesConstraints(uniform_mutation.point))
+                    valid_mutations.push_back(uniform_mutation);
+
+                if (satisfiesConstraints(gaussian_mutation.point))
+                    valid_mutations.push_back(gaussian_mutation);
+
+                if (satisfiesConstraints(non_uniform_mutation.point))
+                    valid_mutations.push_back(non_uniform_mutation);
+
+                if (satisfiesConstraints(dimension_wise_mutation.point))
+                    valid_mutations.push_back(dimension_wise_mutation);
+
+                if (satisfiesConstraints(opposition_based_mutation.point))
+                    valid_mutations.push_back(opposition_based_mutation);
+
+                // Se almeno una mutazione valida, scegli la migliore
+                if (!valid_mutations.empty())
+                {
+                    auto best_mutation = std::min_element(valid_mutations.begin(), valid_mutations.end(),
+                                                          [](const EvaluatedPoint<T, dim> &a, const EvaluatedPoint<T, dim> &b)
+                                                          {
+                                                              return a.value < b.value;
+                                                          });
+
+                    // Aggiorna global_best se la mutazione è migliore
+                    if (best_mutation->value < super::global_best.value)
+                    {
+                        super::global_best = *best_mutation;
+                    }
+                }
+            }
+            /**
+             * \brief Performs random 1d coordinate mutation
+             * \return The uniform mutation point.
+             */
+            EvaluatedPoint<T, dim> uniformMutation()
+            {
+                Point<T, dim> gb_point = super::global_best.point;
+                std::mt19937 rng(std::random_device{}());
+
+                std::uniform_int_distribution<int> dist(0, dim - 1);
+                int x = dist(rng);
+                std::uniform_real_distribution<T> dist_t(super::a[x], super::b[x]);
+                T value = dist_t(rng);
+                gb_point[x] = value;
+
+                return {gb_point, super::fitness_function->evaluate(gb_point)};
+            }
+            EvaluatedPoint<T, dim> GaussianMutation()
+            {
+                Point<T, dim> gb_point = super::global_best.point;
+                std::mt19937 rng(std::random_device{}());
+
+                std::uniform_int_distribution<int> dist(0, dim - 1);
+                int x = dist(rng);
+
+                T sigma = static_cast<T>(0.05) * (super::b[x] - super::a[x]);
+
+                std::normal_distribution<T> gauss(gb_point[x], sigma);
+                T value = gauss(rng);
+
+                // Clamp the value to stay within bounds
+                value = std::max(super::a[x], std::min(super::b[x], value));
+                gb_point[x] = value;
+
+                return {gb_point, super::fitness_function->evaluate(gb_point)};
+            }
+            EvaluatedPoint<T, dim> nonUniformMutation()
+            {
+                Point<T, dim> gb_point = super::global_best.point;
+                std::mt19937 rng(std::random_device{}());
+
+                // 1. Random dimension
+                std::uniform_int_distribution<int> dist(0, dim - 1);
+                int x = dist(rng);
+
+                // 2. Random direction (+ or -)
+                std::uniform_real_distribution<T> uni01(0.0, 1.0);
+                bool increase = uni01(rng) < 0.5;
+
+                // 3. Time-adaptive factor (decreases with iterations)
+                T r = uni01(rng);
+                T b_param = 5.0; // shape parameter
+
+                T delta = (super::b[x] - super::a[x]) * (1.0 - std::pow(r, std::pow(1.0 - static_cast<T>(super::current_iteration) / static_cast<T>(super::max_iterations), b_param)));
+
+                // 4. Apply mutation with clamping
+                if (increase)
+                    gb_point[x] = std::max(super::a[x], std::min(super::b[x], gb_point[x] + delta));
+                else
+                    gb_point[x] = std::max(super::a[x], std::min(super::b[x], gb_point[x] - delta));
+
+                return {gb_point, super::fitness_function->evaluate(gb_point)};
+            }
+            EvaluatedPoint<T, dim> dimensionWiseMutation()
+            {
+                Point<T, dim> gb_point = super::global_best.point;
+                std::mt19937 rng(std::random_device{}());
+
+                // Probability of mutating each dimension
+                T pm = 1.0 / static_cast<T>(dim);
+
+                std::uniform_real_distribution<T> uni01(0.0, 1.0);
+                std::uniform_real_distribution<T> val_dist(0.0, 1.0);
+
+                // For each dimension, decide whether to mutate it
+                for (int i = 0; i < dim; ++i)
+                {
+                    if (uni01(rng) < pm) // Mutation probability
+                    {
+                        // Gaussian perturbation centered at current value
+                        T sigma = 0.05 * (super::b[i] - super::a[i]);
+                        std::normal_distribution<T> gauss(gb_point[i], sigma);
+                        T value = gauss(rng);
+
+                        // Clamp to bounds
+                        gb_point[i] = std::max(super::a[i], std::min(super::b[i], value));
+                    }
+                }
+
+                return {gb_point, super::fitness_function->evaluate(gb_point)};
+            }
+            EvaluatedPoint<T, dim> oppositionBasedMutation()
+            {
+                Point<T, dim> gb_point = super::global_best.point;
+
+                // Opposition-based mutation: reflect each coordinate around the center
+                // opposite[d] = lower[d] + upper[d] - current[d]
+                for (int i = 0; i < dim; ++i)
+                {
+                    gb_point[i] = super::a[i] + super::b[i] - gb_point[i];
+                }
+
+                return {gb_point, super::fitness_function->evaluate(gb_point)};
+            }
+            /**
+             * \brief Returns the best evaluated point found by the swarm.
+             * \return The best evaluated point.
+             */
+            EvaluatedPoint<T, dim> getGlobalBest() const { return super::global_best; }
         };
     };
 }
