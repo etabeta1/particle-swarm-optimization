@@ -137,7 +137,6 @@ namespace Swarm
              * \param num_chaotic_particles The number of chaotic particles in the swarm.
              * \param chaos_map The chaos map used for chaotic particles.
              * \param _max_iterations The maximum number of iterations for the swarm.
-             * \param save_on_file Flag indicating whether to save particle positions to a file.
              * \throws std::invalid_argument if the initial position is not inside the search space.
              *
              * This constructor initializes the swarm with the provided fitness function, search space
@@ -150,8 +149,7 @@ namespace Swarm
                             size_t num_normal_particles,
                             size_t num_chaotic_particles,
                             const ChaosMap<T, dim> &chaos_map,
-                            IterationType _max_iterations,
-                            bool save_on_file)
+                            IterationType _max_iterations)
                 : particles(0),
                   fitness_function(std::move(p)),
                   global_best(initial_best, fitness_function->evaluate(initial_best)),
@@ -160,15 +158,6 @@ namespace Swarm
                   current_iteration(1),
                   max_iterations(_max_iterations)
             {
-                if (save_on_file)
-                {
-                    positions_file.open("points_xy.txt");
-                    if (!positions_file.is_open())
-                    {
-                        std::cerr << "Can't open the points file" << std::endl;
-                    }
-                }
-
                 if (!initial_best.isInsideBox(a, b))
                 {
                     throw std::invalid_argument("Initial position is not inside global search space");
@@ -195,6 +184,49 @@ namespace Swarm
                 }
 
                 constraints.emplace_back(makeBoxConstraint(a, b));
+            }
+
+            /**
+             * \brief Constructs a `CHOPSOOptimizer` with the given parameters.
+             * \param p A unique pointer to the fitness function.
+             * \param initial_best The initial position for the normal particles.
+             * \param _a The lower bounds of the search space.
+             * \param _b The upper bounds of the search space.
+             * \param num_normal_particles The number of normal particles in the swarm.
+             * \param num_chaotic_particles The number of chaotic particles in the swarm.
+             * \param chaos_map The chaos map used for chaotic particles.
+             * \param _max_iterations The maximum number of iterations for the swarm.
+             * \param save_on_file Flag indicating whether to save particle positions to a file.
+             * \throws std::invalid_argument if the initial position is not inside the search space.
+             * \throws std::runtime_error if the output file cannot be opened.
+             *
+             * This constructor initializes the swarm with the provided fitness function, search space
+             * bounds, and maximum iterations.
+             */
+            CHOPSOOptimizer(std::unique_ptr<ObjectiveFunction<T, dim>> &p,
+                            const Point<T, dim> &initial_best,
+                            const Point<T, dim> &_a,
+                            const Point<T, dim> &_b,
+                            size_t num_normal_particles,
+                            size_t num_chaotic_particles,
+                            const ChaosMap<T, dim> &chaos_map,
+                            IterationType _max_iterations,
+                            std::string output_file)
+                : CHOPSOOptimizer<T, dim>(p,
+                                          initial_best,
+                                          _a,
+                                          _b,
+                                          num_normal_particles,
+                                          num_chaotic_particles,
+                                          chaos_map,
+                                          _max_iterations)
+            {
+                positions_file.open(output_file);
+
+                if (!positions_file.is_open())
+                {
+                    throw std::runtime_error("Could not open output file for writing.");
+                }
             }
 
             /**
@@ -328,26 +360,27 @@ namespace Swarm
                              size_t num_chaotic_particles,
                              const ChaosMap<T, dim> &chaos_map,
                              IterationType _max_iterations,
-                             bool save_on_file) : CHOPSOOptimizer<T,dim>(p,
-                                                                  initial_best,
-                                                                  _a,
-                                                                  _b,
-                                                                  num_normal_particles,
-                                                                  num_chaotic_particles,
-                                                                  chaos_map,
-                                                                  _max_iterations,
-                                                                  save_on_file) {};
+                             bool save_on_file) : CHOPSOOptimizer<T, dim>(p,
+                                                                          initial_best,
+                                                                          _a,
+                                                                          _b,
+                                                                          num_normal_particles,
+                                                                          num_chaotic_particles,
+                                                                          chaos_map,
+                                                                          _max_iterations,
+                                                                          save_on_file) {};
 
             /**
              * \brief Updates the positions of all particles in the swarm and, if enabled, logs their positions to a file.
              */
-            using super = CHOPSOOptimizer<T,dim>;
-             void updateEveryone() override
-            {   
+            using super = CHOPSOOptimizer<T, dim>;
+            void updateEveryone() override
+            {
                 super::updateEveryone();
                 mutateGlobalBest();
             }
-            void run() override{
+            void run() override
+            {
                 super::run();
             }
             void mutateGlobalBest()

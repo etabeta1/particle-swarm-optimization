@@ -109,7 +109,6 @@ namespace Swarm
             {
                 if (!(c(this->position)))
                 {
-                    std::cout << "OOB" << std::endl;
                     return handleOutOfBounds(c, constraints);
                 }
             }
@@ -265,7 +264,6 @@ namespace Swarm
          */
         bool handleOutOfBounds(const Constraint<T, dim> &, const std::vector<Constraint<T, dim>> &) override
         {
-            std::cout << "Normal OOB" << std::endl;
             // If we are OOB, just do not update the personal best, the velocity will eventually point towards a valid point
             return false;
         }
@@ -318,7 +316,6 @@ namespace Swarm
          */
         bool handleOutOfBounds(const Constraint<T, dim> &, const std::vector<Constraint<T, dim>> &) override
         {
-            std::cout << "Chaotic OOB" << std::endl;
             // If we are OOB, just do not update the personal best, the velocity will eventually point towards a valid point
             return false;
         }

@@ -18,7 +18,7 @@ DOCS_FOLDER=docs
 COMMON_FLAGS=-I$(SWARM_FOLDER) -fopenmp -Wall -Wextra -std=c++23 -march=native
 
 TEST_FLAGS=$(COMMON_FLAGS) -g -O0 -fsanitize=address,undefined
-DIST_FLAGS=$(COMMON_FLAGS) -O2
+DIST_FLAGS=$(COMMON_FLAGS) -O2 -Ijson/include
 
 all: test docs dist
 
