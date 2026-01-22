@@ -1,3 +1,5 @@
 bin/*
 *.txt
 src/*.txt
+tools/*.json
+tools/*.png
