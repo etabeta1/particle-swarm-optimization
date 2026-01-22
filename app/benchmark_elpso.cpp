@@ -68,7 +68,7 @@ int main()
             std::cout << "Time elapsed: " << elapsed.count() << " seconds.\n"
                       << "============================\n";
 
-            benchmark[std::to_string(i * cpus + j + 1)] = {
+            benchmark[std::to_string(i * 4 + j + 1)] = {
                 {"threads", i + 1},
                 {"particles_per_type", particles},
                 {"time_seconds", elapsed.count()}};
