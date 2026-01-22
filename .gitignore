@@ -3,3 +3,4 @@ bin/*
 src/*.txt
 tools/*.json
 tools/*.png
+tools/*.txt
