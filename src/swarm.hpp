@@ -342,14 +342,35 @@ namespace Swarm
              * \brief Updates the positions of all particles in the swarm and, if enabled, logs their positions to a file.
              */
             using super = CHOPSOOptimizer<T,dim>;
-             void updateEveryone() override
-            {   
+
+            /**
+             * \brief Updates the positions of all particles then applies genetic mutation.
+             * \details Calls the base `updateEveryone()` and then attempts to mutate the
+             * global best using several mutation strategies.
+             * \note Overrides `CHOPSOOptimizer::updateEveryone`.
+             */
+            void updateEveryone() override
+            {
                 super::updateEveryone();
                 mutateGlobalBest();
             }
-            void run() override{
+
+            /**
+             * \brief Runs the optimizer loop.
+             * \details Delegates to the base `run()` implementation which iterates until
+             * the maximum number of iterations is reached.
+             */
+            void run() override
+            {
                 super::run();
             }
+
+            /**
+             * \brief Attempts multiple mutation operators on the current global best.
+             * \details Executes several independent mutation strategies in parallel,
+             * filters those satisfying constraints and, if any improvement is found,
+             * updates the global best accordingly.
+             */
             void mutateGlobalBest()
             {
                 // Initialize with dummy values
@@ -442,6 +463,10 @@ namespace Swarm
 
                 return {gb_point, super::fitness_function->evaluate(gb_point)};
             }
+            /**
+             * \brief Performs a Gaussian perturbation on a randomly chosen coordinate of the global best.
+             * \return The evaluated point after Gaussian mutation.
+             */
             EvaluatedPoint<T, dim> GaussianMutation()
             {
                 Point<T, dim> gb_point = super::global_best.point;
@@ -461,6 +486,12 @@ namespace Swarm
 
                 return {gb_point, super::fitness_function->evaluate(gb_point)};
             }
+            /**
+             * \brief Performs a time-dependent non-uniform mutation on one coordinate.
+             * \details Mutation magnitude decreases with the number of iterations to
+             * encourage exploitation at later stages.
+             * \return The evaluated point after non-uniform mutation.
+             */
             EvaluatedPoint<T, dim> nonUniformMutation()
             {
                 Point<T, dim> gb_point = super::global_best.point;
@@ -488,6 +519,10 @@ namespace Swarm
 
                 return {gb_point, super::fitness_function->evaluate(gb_point)};
             }
+            /**
+             * \brief Mutates each dimension independently with small Gaussian perturbations.
+             * \return The evaluated point after dimension-wise mutation.
+             */
             EvaluatedPoint<T, dim> dimensionWiseMutation()
             {
                 Point<T, dim> gb_point = super::global_best.point;
@@ -516,6 +551,11 @@ namespace Swarm
 
                 return {gb_point, super::fitness_function->evaluate(gb_point)};
             }
+            /**
+             * \brief Generates the opposition-based counterpart of the global best
+             * by reflecting coordinates across the center of the search box.
+             * \return The evaluated point after opposition-based mutation.
+             */
             EvaluatedPoint<T, dim> oppositionBasedMutation()
             {
                 Point<T, dim> gb_point = super::global_best.point;

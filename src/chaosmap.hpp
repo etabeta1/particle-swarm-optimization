@@ -142,11 +142,25 @@ namespace Swarm
     };
     namespace ChaosFactory
     {
-        // Chebyshev ChaosMap xk+1​=cos(arccos(xk​)*k),xk​∈[−1,1]
+        /**
+         * \brief Chebyshev chaos map implementation.
+         * \tparam T The data type for the coordinates (default is float).
+         * \tparam dim The dimensionality of the points (default is 2).
+         * \see ChaosMap
+         * \see Point
+         *
+         * Implements the Chebyshev chaos map with the recurrence relation:
+         * x_{k+1} = cos(arccos(x_k) * k), where x_k ∈ [-1, 1]
+         */
         template <typename T = float, int dim = 2>
         class Chebyshev : public ChaosMap<T, dim>
         {
         public:
+            /**
+             * \brief Constructs a Chebyshev chaos map with default parameters.
+             * The domain is set to [-1, 1].
+             * \see ChaosMap::ChaosMap()
+             */
             Chebyshev()
                 : ChaosMap<T, dim>(
                       [](const Point<T, dim> &p, int k)
@@ -159,7 +173,17 @@ namespace Swarm
             }
         };
 
-        // Singer ChaosMap xk+1​=μ(7.86xk​−23.31xk2​+28.75xk3​−13.302875xk4​) where mu(0,1]
+        /**
+         * \brief Singer chaos map implementation.
+         * \tparam T The data type for the coordinates (default is float).
+         * \tparam dim The dimensionality of the points (default is 2).
+         * \see ChaosMap
+         * \see Point
+         *
+         * Implements the Singer chaos map with the recurrence relation:
+         * x_{k+1} = μ(7.86x_k − 23.31x_k² + 28.75x_k³ − 13.302875x_k⁴),
+         * where μ ∈ (0, 1]. The domain is [0, 1].
+         */
         template <typename T = float, int dim = 2>
         class Singer : public ChaosMap<T, dim>
         {
@@ -171,6 +195,12 @@ namespace Swarm
             }
 
         public:
+            /**
+             * \brief Constructs a Singer chaos map with the given parameter μ.
+             * \param mu_in The control parameter μ ∈ (0, 1]. Default is 1.
+             * \see ChaosMap::ChaosMap()
+             * \see normalize_mu()
+             */
             Singer(T mu_in = static_cast<T>(1))
                 : ChaosMap<T, dim>(
                       [mu = normalize_mu(mu_in)](const Point<T, dim> &p, int k)
@@ -187,7 +217,17 @@ namespace Swarm
             }
         };
 
-        // Sine ChaosMap xk+1​=a*sin(πxk​) a(0,1]
+        /**
+         * \brief Sine chaos map implementation.
+         * \tparam T The data type for the coordinates (default is float).
+         * \tparam dim The dimensionality of the points (default is 2).
+         * \see ChaosMap
+         * \see Point
+         *
+         * Implements the Sine chaos map with the recurrence relation:
+         * x_{k+1} = a * sin(πx_k), where a ∈ (0, 1].
+         * The domain is [0, 1].
+         */
         template <typename T = float, int dim = 2>
         class Sine : public ChaosMap<T, dim>
         {
@@ -199,6 +239,12 @@ namespace Swarm
             }
 
         public:
+            /**
+             * \brief Constructs a Sine chaos map with the given parameter a.
+             * \param a_in The control parameter a ∈ (0, 1]. Default is 1.
+             * \see ChaosMap::ChaosMap()
+             * \see normalize_a()
+             */
             Sine(T a_in = static_cast<T>(1))
                 : ChaosMap<T, dim>(
                       [a = normalize_a(a_in)](const Point<T, dim> &p, int k)
@@ -212,7 +258,17 @@ namespace Swarm
             }
         };
 
-        // Sinusoidal ChaosMap xk+1​=axk2​sin(πxk​) a(0,1]
+        /**
+         * \brief Sinusoidal chaos map implementation.
+         * \tparam T The data type for the coordinates (default is float).
+         * \tparam dim The dimensionality of the points (default is 2).
+         * \see ChaosMap
+         * \see Point
+         *
+         * Implements the Sinusoidal chaos map with the recurrence relation:
+         * x_{k+1} = a * x_k² * sin(πx_k), where a ∈ (0, 1].
+         * The domain is [0, 1].
+         */
         template <typename T = float, int dim = 2>
         class Sinusoidal : public ChaosMap<T, dim>
         {
@@ -224,6 +280,12 @@ namespace Swarm
             }
 
         public:
+            /**
+             * \brief Constructs a Sinusoidal chaos map with the given parameter a.
+             * \param a_in The control parameter a ∈ (0, 1]. Default is 1.
+             * \see ChaosMap::ChaosMap()
+             * \see normalize_a()
+             */
             Sinusoidal(T a_in = static_cast<T>(1))
                 : ChaosMap<T, dim>(
                       [a = normalize_a(a_in)](const Point<T, dim> &p, int k)
@@ -237,7 +299,17 @@ namespace Swarm
             }
         };
 
-        // LogisticMap ChaosMap xk+1​=μxk​(1−xk​) mu(0,4]
+        /**
+         * \brief Logistic chaos map implementation.
+         * \tparam T The data type for the coordinates (default is float).
+         * \tparam dim The dimensionality of the points (default is 2).
+         * \see ChaosMap
+         * \see Point
+         *
+         * Implements the Logistic chaos map with the recurrence relation:
+         * x_{k+1} = μ * x_k * (1 − x_k), where μ ∈ (0, 4].
+         * The domain is [0, 1]. This is one of the most famous chaotic maps.
+         */
         template <typename T = float, int dim = 2>
         class LogisticMap : public ChaosMap<T, dim>
         {
@@ -249,6 +321,12 @@ namespace Swarm
             }
 
         public:
+            /**
+             * \brief Constructs a Logistic chaos map with the given parameter μ.
+             * \param mu_in The control parameter μ ∈ (0, 4]. Default is 4.
+             * \see ChaosMap::ChaosMap()
+             * \see normalize_mu()
+             */
             LogisticMap(T mu_in = static_cast<T>(4))
                 : ChaosMap<T, dim>(
                       [mu = normalize_mu(mu_in)](const Point<T, dim> &p, int k)
@@ -260,7 +338,17 @@ namespace Swarm
             {
             }
         };
-        // Iterative ChaosMap xk+1​=sin(​aπ/xk​) a>0
+        /**
+         * \brief Iterative chaos map implementation.
+         * \tparam T The data type for the coordinates (default is float).
+         * \tparam dim The dimensionality of the points (default is 2).
+         * \see ChaosMap
+         * \see Point
+         *
+         * Implements the Iterative chaos map with the recurrence relation:
+         * x_{k+1} = sin(aπ / x_k), where a > 0.
+         * The domain is [-1, 1].
+         */
         template <typename T = float, int dim = 2>
         class Iterative : public ChaosMap<T, dim>
         {
@@ -272,6 +360,12 @@ namespace Swarm
             }
 
         public:
+            /**
+             * \brief Constructs an Iterative chaos map with the given parameter a.
+             * \param a_in The control parameter a > 0. Default is 1.
+             * \see ChaosMap::ChaosMap()
+             * \see normalize_a()
+             */
             Iterative(T a_in = static_cast<T>(1))
                 : ChaosMap<T, dim>(
                       [a = normalize_a(a_in)](const Point<T, dim> &p, int k)
