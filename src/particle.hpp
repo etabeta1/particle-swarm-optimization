@@ -238,7 +238,7 @@ namespace Swarm
          *
          * The position and speed are initialized to zero.
          */
-        NormalParticle() : Particle<T, dim>(), speed(T(0)), r1(generate_random(0.f, 1.f)), r2(generate_random(0.f, 1.f)) {}
+        NormalParticle() : Particle<T, dim>(), r1(generate_random(0.f, 1.f)), r2(generate_random(0.f, 1.f)), speed(T(0)) {}
 
         /**
          * \copydoc Particle::updatePosition

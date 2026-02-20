@@ -400,15 +400,16 @@ namespace Swarm
                         float initial_temperature,
                         float alpha,
                         bool save_on_file)
-                : particles(0),
+                : current_temperature(initial_temperature),
+                  cooling_rate(alpha),
+                  particles(0),
                   fitness_function(p),
                   global_best(initial_best, fitness_function->evaluate(initial_best)),
                   a(_a),
                   b(_b),
                   current_iteration(1),
-                  max_iterations(_max_iterations),
-                  current_temperature(initial_temperature),
-                  cooling_rate(alpha)
+                  max_iterations(_max_iterations)
+
             {
                 if (save_on_file)
                 {
