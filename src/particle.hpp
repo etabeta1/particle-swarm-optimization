@@ -60,7 +60,7 @@ namespace Swarm
          * strategies where the initial position does not necessarily coincide with the initial
          * personal best.
          */
-        void reinit(const Point<T, dim> &initial_position, const Point<T, dim> &local_best, const ObjectiveFunction<T, dim> &func)
+        virtual void reinit(const Point<T, dim> &initial_position, const Point<T, dim> &local_best, const ObjectiveFunction<T, dim> &func)
         {
             this->position = initial_position;
             this->personal_best = {local_best, func.evaluate(local_best)};
@@ -183,11 +183,6 @@ namespace Swarm
     {
     private:
         /**
-         * \brief The speed of the particle.
-         */
-        Point<T, dim> speed;
-
-        /**
          * \brief Cognitive coefficient.
          */
         float c1 = 2.5f;
@@ -198,6 +193,12 @@ namespace Swarm
         float c2 = 2.5f;
 
         float r1, r2;
+
+    protected:
+        /**
+         * \brief The speed of the particle.
+         */
+        Point<T, dim> speed;
 
         /**
          * \brief Updates the speed of the normal particle.
@@ -236,7 +237,7 @@ namespace Swarm
          *
          * The position and speed are initialized to zero.
          */
-        NormalParticle() : Particle<T, dim>(), speed(T(0)), r1(generate_random(0.f, 1.f)), r2(generate_random(0.f, 1.f)) {}
+        NormalParticle() : Particle<T, dim>(), r1(generate_random(0.f, 1.f)), r2(generate_random(0.f, 1.f)), speed(T(0)) {}
 
         /**
          * \copydoc Particle::updatePosition
@@ -318,6 +319,74 @@ namespace Swarm
         {
             // If we are OOB, just do not update the personal best, the velocity will eventually point towards a valid point
             return false;
+        }
+    };
+
+    /**
+     * \brief Definition of the SA_normal particle.
+     * \tparam T The type used to store the coordinates (defaults to `float`).
+     * \tparam dim The number of dimensions for the vector (defaults to 2).
+     *
+     * This class represents a normal particle that follows the PSO logic.
+     */
+    template <typename T = float, int dim = 2>
+    class SANormalParticle : public NormalParticle<T, dim>
+    {
+    private:
+        /**
+         * \brief The current temperature of the particle.
+         */
+        float temperature;
+
+        /**
+         * \brief A shared pointer to the objective function used to evaluate the particle's position.
+         */
+        std::shared_ptr<ObjectiveFunction<T, dim>> objective_function;
+
+    public:
+        /**
+         * \brief Constructs a `NormalParticle` with default position and speed.
+         *
+         * The position and speed are initialized to zero.
+         */
+        SANormalParticle(float initial_temperature, std::shared_ptr<ObjectiveFunction<T, dim>> _objective_function) : NormalParticle<T, dim>(), temperature(initial_temperature), objective_function(_objective_function) {}
+
+        /**
+         * \brief Sets the temperature of the particle.
+         * \param new_t The new temperature to set.
+         */
+        void setTemperature(float new_t)
+        {
+            this->temperature = new_t;
+        }
+
+        /**
+         * \copydoc Particle::updatePosition
+         *
+         * This function updates the position of the normal particle following the simulated annealing logic using its speed and clamps it within the boundaries.
+         */
+        void updatePosition(const Point<T, dim> &global_best, const Point<T, dim> &a, const Point<T, dim> &b, IterationType current_iteration, IterationType max_iterations, const std::vector<Constraint<T, dim>> &) override
+        {
+            this->updateSpeed(global_best, current_iteration, max_iterations);
+
+            float current_value = this->objective_function->evaluate(this->position);
+            float next_value = this->objective_function->evaluate((this->position + this->speed).clamp(a, b));
+
+            if (next_value <= current_value)
+            {
+                this->position = (this->position + this->speed).clamp(a, b);
+            }
+            else
+            {
+
+                float acceptance_prob = exp((current_value - next_value) / temperature);
+                float random_value = generate_random(0.0f, 1.0f);
+
+                if (random_value < acceptance_prob)
+                {
+                    this->position = (this->position + this->speed).clamp(a, b);
+                }
+            }
         }
     };
 };
