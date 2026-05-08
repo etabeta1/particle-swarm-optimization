@@ -9,7 +9,7 @@
 #include <chrono>
 #include <iostream>
 
-std::chrono::duration<double> measure(int threads, int particles, std::unique_ptr<Swarm::ObjectiveFunction<float, 2>> fitness, const Swarm::ChaosMap<float, 2> &chaosMap)
+std::chrono::duration<double> measure(int threads, int particles, std::shared_ptr<Swarm::ObjectiveFunction<float, 2>> fitness, const Swarm::ChaosMap<float, 2> &chaosMap)
 {
     using T = float;
     constexpr int dim = 2;
@@ -24,8 +24,7 @@ std::chrono::duration<double> measure(int threads, int particles, std::unique_pt
 
     Swarm::Point<T, dim> initial_best(.5f);
 
-    Swarm::Optimizers::SAOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, 395.0f,
-                                                 0.95f, true);
+    Swarm::Optimizers::SAOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, 395.0f, 0.95f);
 
     auto start = std::chrono::high_resolution_clock::now();
     swarm.run();
@@ -59,7 +58,7 @@ int main()
         {
             int particles = 16384 << j;
 
-            std::unique_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_unique<Swarm::ObjectiveFunctions::DropwaveFunction<T, dim>>();
+            std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_shared<Swarm::ObjectiveFunctions::DropwaveFunction<T, dim>>();
 
             std::cout << "\n============================\n"
                       << "Benchmarking with " << (i + 1) << " threads and " << particles << " particles per type.\n";
@@ -76,7 +75,7 @@ int main()
         }
     }
 
-    std::ofstream benchmark_file("/work/u10822715/benchmark/benchmark_elpso.json");
+    std::ofstream benchmark_file("/work/u10768804/benchmark/benchmark_elpso.json");
     benchmark_file << benchmark.dump(4);
     benchmark_file.close();
 

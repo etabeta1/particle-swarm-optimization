@@ -9,7 +9,7 @@
 #include <chrono>
 #include <iostream>
 
-std::chrono::duration<double> measure(int threads, int particles, std::unique_ptr<Swarm::ObjectiveFunction<float, 2>> fitness, const Swarm::ChaosMap<float, 2> &chaosMap)
+std::chrono::duration<double> measure(int threads, int particles, std::shared_ptr<Swarm::ObjectiveFunction<float, 2>> fitness, const Swarm::ChaosMap<float, 2> &chaosMap)
 {
     using T = float;
     constexpr int dim = 2;
@@ -58,7 +58,7 @@ int main()
         {
             int particles = 16384 << j;
 
-            std::unique_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_unique<Swarm::ObjectiveFunctions::DropwaveFunction<T, dim>>();
+            std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_shared<Swarm::ObjectiveFunctions::DropwaveFunction<T, dim>>();
 
             std::cout << "\n============================\n"
                       << "Benchmarking with " << (i + 1) << " threads and " << particles << " particles per type.\n";

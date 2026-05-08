@@ -89,7 +89,7 @@ namespace Swarm
             /**
              * \brief The fitness function used to evaluate particle positions.
              */
-            std::unique_ptr<ObjectiveFunction<T, dim>> fitness_function;
+            std::shared_ptr<ObjectiveFunction<T, dim>> fitness_function;
 
             /**
              * \brief The best evaluated point found by the swarm.
@@ -129,7 +129,7 @@ namespace Swarm
         public:
             /**
              * \brief Constructs a `CHOPSOOptimizer` with the given parameters.
-             * \param p A unique pointer to the fitness function.
+             * \param p A pointer to the fitness function.
              * \param initial_best The initial position for the normal particles.
              * \param _a The lower bounds of the search space.
              * \param _b The upper bounds of the search space.
@@ -142,7 +142,7 @@ namespace Swarm
              * This constructor initializes the swarm with the provided fitness function, search space
              * bounds, and maximum iterations.
              */
-            CHOPSOOptimizer(std::unique_ptr<ObjectiveFunction<T, dim>> &p,
+            CHOPSOOptimizer(std::shared_ptr<ObjectiveFunction<T, dim>> &p,
                             const Point<T, dim> &initial_best,
                             const Point<T, dim> &_a,
                             const Point<T, dim> &_b,
@@ -188,7 +188,7 @@ namespace Swarm
 
             /**
              * \brief Constructs a `CHOPSOOptimizer` with the given parameters.
-             * \param p A unique pointer to the fitness function.
+             * \param p A pointer to the fitness function.
              * \param initial_best The initial position for the normal particles.
              * \param _a The lower bounds of the search space.
              * \param _b The upper bounds of the search space.
@@ -203,7 +203,7 @@ namespace Swarm
              * This constructor initializes the swarm with the provided fitness function, search space
              * bounds, and maximum iterations.
              */
-            CHOPSOOptimizer(std::unique_ptr<ObjectiveFunction<T, dim>> &p,
+            CHOPSOOptimizer(std::shared_ptr<ObjectiveFunction<T, dim>> &p,
                             const Point<T, dim> &initial_best,
                             const Point<T, dim> &_a,
                             const Point<T, dim> &_b,
@@ -337,7 +337,7 @@ namespace Swarm
         public:
             /**
              * \brief Constructs a `GENETICOptimizer` with the given parameters.
-             * \param p A unique pointer to the fitness function.
+             * \param p A pointer to the fitness function.
              * \param initial_best The initial position for the normal particles.
              * \param _a The lower bounds of the search space.
              * \param _b The upper bounds of the search space.
@@ -350,7 +350,7 @@ namespace Swarm
              * This constructor initializes the swarm with the provided fitness function, search space
              * bounds, and maximum iterations.
              */
-            GENETICOptimizer(std::unique_ptr<ObjectiveFunction<T, dim>> &p,
+            GENETICOptimizer(std::shared_ptr<ObjectiveFunction<T, dim>> &p,
                              const Point<T, dim> &initial_best,
                              const Point<T, dim> &_a,
                              const Point<T, dim> &_b,
@@ -369,7 +369,7 @@ namespace Swarm
 
             /**
              * \brief Constructs a `GENETICOptimizer` with the given parameters.
-             * \param p A unique pointer to the fitness function.
+             * \param p A pointer to the fitness function.
              * \param initial_best The initial position for the normal particles.
              * \param _a The lower bounds of the search space.
              * \param _b The upper bounds of the search space.
@@ -383,7 +383,7 @@ namespace Swarm
              * This constructor initializes the swarm with the provided fitness function, search space
              * bounds, and maximum iterations.
              */
-            GENETICOptimizer(std::unique_ptr<ObjectiveFunction<T, dim>> &p,
+            GENETICOptimizer(std::shared_ptr<ObjectiveFunction<T, dim>> &p,
                              const Point<T, dim> &initial_best,
                              const Point<T, dim> &_a,
                              const Point<T, dim> &_b,
@@ -614,7 +614,7 @@ namespace Swarm
          * This class manages a swarm of particles and performs optimization using the CHOPSO algorithm.
          */
         template <typename T = float, int dim = 2>
-        class SAOptimizer : protected CHOPSOOptimizer<T, dim>
+        class SAOptimizer : public CHOPSOOptimizer<T, dim>
         {
         private:
             float current_temperature;
@@ -673,6 +673,51 @@ namespace Swarm
                         float alpha,
                         std::string output_file)
                 : CHOPSOOptimizer<T, dim>(p, initial_best, _a, _b, 0, num_chaotic_particles, chaos_map, _max_iterations, output_file),
+                  current_temperature(initial_temperature),
+                  cooling_rate(alpha)
+
+            {
+                for (size_t i = 0; i < num_normal_particles; i++)
+                {
+                    std::unique_ptr<Particle<T, dim>> particle =
+                        std::make_unique<SANormalParticle<T, dim>>(current_temperature, super::fitness_function);
+                    Point<T, dim> random_pos([this](size_t j)
+                                             { return generate_random(super::a[j], super::b[j]); });
+                    particle->reinit(random_pos, initial_best, *(super::fitness_function));
+                    super::particles.emplace_back(std::move(particle));
+                }
+            }
+
+            /**
+             * @brief Construct a new SAOptimizer object
+             *
+             * @param p A shared pointer to the fitness function.
+             * @param initial_best The initial position for the normal particles.
+             * @param _a The lower bounds of the search space.
+             * @param _b  The upper bounds of the search space.
+             * @param num_normal_particles The number of normal particles in the swarm.
+             * @param num_chaotic_particles The number of chaotic particles in the swarm.
+             * @param chaos_map The chaos map used for chaotic particles.
+             * @param _max_iterations The maximum number of iterations for the swarm.
+             * @param initial_temperature The initial temperature for the simulated annealing process.
+             * @param alpha The cooling rate for the simulated annealing process.
+             * @param save_on_file Flag indicating whether to save particle positions to a file.
+             * @throws std::invalid_argument if the initial position is not inside the search space.
+             *
+             * This constructor initializes the swarm with the provided fitness function, search space
+             * bounds, maximum iterations, and simulated annealing parameters.
+             */
+            SAOptimizer(std::shared_ptr<ObjectiveFunction<T, dim>> &p,
+                        const Point<T, dim> &initial_best,
+                        const Point<T, dim> &_a,
+                        const Point<T, dim> &_b,
+                        size_t num_normal_particles,
+                        size_t num_chaotic_particles,
+                        const ChaosMap<T, dim> &chaos_map,
+                        IterationType _max_iterations,
+                        float initial_temperature,
+                        float alpha)
+                : CHOPSOOptimizer<T, dim>(p, initial_best, _a, _b, 0, num_chaotic_particles, chaos_map, _max_iterations),
                   current_temperature(initial_temperature),
                   cooling_rate(alpha)
 
