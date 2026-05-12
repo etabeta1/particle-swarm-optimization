@@ -22,11 +22,11 @@ std::chrono::duration<double> measure(int threads, int particles, std::shared_pt
     Swarm::Point<T, dim> a(-15.f);
     Swarm::Point<T, dim> b(+15.f);
 
-    Swarm::Point<T, dim> initial_best(.5f);
+    Swarm::Point<T, dim> initial_best(10.0f);
 
-    Swarm::Optimizers::SAOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, 395.0f, 0.95f,"/work/u10768804/benchmark/points_benchmark_SAopt_drop_dist_00_r05.json");
+    Swarm::Optimizers::CHOPSOOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, "/work/u10768804/benchmark/positions_benchmark_chopso_drop_dist_10_r95_p28_n16k.txt");
 
-    Swarm::Point<T, dim> center(10.0f); 
+    Swarm::Point<T, dim> center(10.0f);
     T radius = 9.5f;
     auto dist_constraint = Swarm::makeMaxDistanceConstraint<T, dim>(center, radius);
     swarm.addConstraint(dist_constraint);
@@ -57,30 +57,26 @@ int main()
 
     constexpr int cpus = 28;
 
-    for (size_t i = 0; i < cpus; i++)
-    {
-        for (size_t j = 0; j < 4; j++)
-        {
-            int particles = 16384 << j;
+    size_t j = 0;
 
-            std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_shared<Swarm::ObjectiveFunctions::DropwaveFunction<T, dim>>();
+    int particles = 16384 << j;
 
-            std::cout << "\n============================\n"
-                      << "Benchmarking with " << (i + 1) << " threads and " << particles << " particles per type.\n";
+    std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_shared<Swarm::ObjectiveFunctions::DropwaveFunction<T, dim>>();
 
-            auto elapsed = measure(i + 1, particles, std::move(fitness), Swarm::ChaosFactory::Chebyshev<T, dim>());
+    std::cout << "\n============================\n"
+              << "Benchmarking with " << (cpus) << " threads and " << particles << " particles per type.\n";
 
-            std::cout << "Time elapsed: " << elapsed.count() << " seconds.\n"
-                      << "============================\n";
+    auto elapsed = measure(cpus, particles, std::move(fitness), Swarm::ChaosFactory::Chebyshev<T, dim>());
 
-            benchmark[std::to_string(i * 4 + j + 1)] = {
-                {"threads", i + 1},
-                {"particles_per_type", particles},
-                {"time_seconds", elapsed.count()}};
-        }
-    }
+    std::cout << "Time elapsed: " << elapsed.count() << " seconds.\n"
+              << "============================\n";
 
-    std::ofstream benchmark_file("/work/u10768804/benchmark/benchmark_SAopt_drop_dist_00_r05.json");
+    benchmark[std::to_string((cpus - 1) * 4 + j + 1)] = {
+        {"threads", cpus},
+        {"particles_per_type", particles},
+        {"time_seconds", elapsed.count()}};
+
+    std::ofstream benchmark_file("/work/u10768804/benchmark/benchmark_chopso_drop_dist_10_r95_p28_n16k.json");
     benchmark_file << benchmark.dump(4);
     benchmark_file.close();
 

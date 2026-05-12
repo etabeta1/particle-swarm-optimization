@@ -331,7 +331,7 @@ namespace Swarm
          * This class manages a swarm of particles and performs optimization using the CHOPSO algorithm.
          */
         template <typename T = float, int dim = 2>
-        class GENETICOptimizer : protected CHOPSOOptimizer<T, dim>
+        class GENETICOptimizer : public CHOPSOOptimizer<T, dim>
         {
 
         public:

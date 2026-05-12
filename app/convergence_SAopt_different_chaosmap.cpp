@@ -23,23 +23,23 @@ int main()
     Swarm::Point<T, dim> initial_best(5.f);
 
     std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness2 = std::make_shared<Swarm::ObjectiveFunctions::AckleyFunction<T, dim>>();
-    Swarm::Optimizers::CHOPSOOptimizer<T, dim> swarm_alpine1(fitness2, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Iterative<T, dim>(), max_iterations, "/work/u10768804/benchmark/chopso_convergence_ackley_iterative.txt");
+    Swarm::Optimizers::SAOptimizer<T, dim> swarm_alpine1(fitness2, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Iterative<T, dim>(), max_iterations, 395.0f, 0.95f, "/work/u10768804/benchmark/SAopt_convergence_ackley_iterative.txt");
     swarm_alpine1.run();
 
     std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness3 = std::make_shared<Swarm::ObjectiveFunctions::AckleyFunction<T, dim>>();
-    Swarm::Optimizers::CHOPSOOptimizer<T, dim> swarm_dropwave(fitness3, initial_best, a, b, nN, nC, Swarm::ChaosFactory::LogisticMap<T, dim>(), max_iterations, "/work/u10768804/benchmark/chopso_convergence_ackley_logistic.txt");
+    Swarm::Optimizers::SAOptimizer<T, dim> swarm_dropwave(fitness3, initial_best, a, b, nN, nC, Swarm::ChaosFactory::LogisticMap<T, dim>(), max_iterations, 395.0f, 0.95f, "/work/u10768804/benchmark/SAopt_convergence_ackley_logistic.txt");
     swarm_dropwave.run();
 
     std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness4 = std::make_shared<Swarm::ObjectiveFunctions::AckleyFunction<T, dim>>();
-    Swarm::Optimizers::CHOPSOOptimizer<T, dim> swarm_ellipsoid(fitness4, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Sine<T, dim>(), max_iterations, "/work/u10768804/benchmark/chopso_convergence_ackley_sine.txt");
+    Swarm::Optimizers::SAOptimizer<T, dim> swarm_ellipsoid(fitness4, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Sine<T, dim>(), max_iterations, 395.0f, 0.95f, "/work/u10768804/benchmark/SAopt_convergence_ackley_sine.txt");
     swarm_ellipsoid.run();
 
     std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness5 = std::make_shared<Swarm::ObjectiveFunctions::AckleyFunction<T, dim>>();
-    Swarm::Optimizers::CHOPSOOptimizer<T, dim> swarm_quintic(fitness5, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Singer<T, dim>(), max_iterations, "/work/u10768804/benchmark/chopso_convergence_ackley_singer.txt");
+    Swarm::Optimizers::SAOptimizer<T, dim> swarm_quintic(fitness5, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Singer<T, dim>(), max_iterations, 395.0f, 0.95f, "/work/u10768804/benchmark/SAopt_convergence_ackley_singer.txt");
     swarm_quintic.run();
 
     std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness6 = std::make_shared<Swarm::ObjectiveFunctions::AckleyFunction<T, dim>>();
-    Swarm::Optimizers::CHOPSOOptimizer<T, dim> swarm_sphere(fitness6, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Sinusoidal<T, dim>(), max_iterations, "/work/u10768804/benchmark/chopso_convergence_ackley_sinusoidal.txt");
+    Swarm::Optimizers::SAOptimizer<T, dim> swarm_sphere(fitness6, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Sinusoidal<T, dim>(), max_iterations, 395.0f, 0.95f, "/work/u10768804/benchmark/SAopt_convergence_ackley_sinusoidal.txt");
     swarm_sphere.run();
 
     return 0;
