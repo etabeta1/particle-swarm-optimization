@@ -19,8 +19,8 @@ std::chrono::duration<double> measure(int threads, int particles, std::shared_pt
 
     omp_set_num_threads(threads);
 
-    Swarm::Point<T, dim> a(-15.f);
-    Swarm::Point<T, dim> b(+15.f);
+    Swarm::Point<T, dim> a(-30.f);
+    Swarm::Point<T, dim> b(+30.f);
 
     Swarm::Point<T, dim> initial_best(10.f);
 
