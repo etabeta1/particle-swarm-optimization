@@ -54,9 +54,9 @@ int main()
 
     for (size_t i = 0; i < cpus; i++)
     {
-        for (size_t j = 0; j < 4; j++)
+        for (size_t j = 0; j < 3; j++)
         {
-            int particles = 16384 << j;
+            int particles = 10000 * (std::pow(2, 2 * j));
 
             std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness = std::make_shared<Swarm::ObjectiveFunctions::DropwaveFunction<T, dim>>();
 
@@ -68,7 +68,7 @@ int main()
             std::cout << "Time elapsed: " << elapsed.count() << " seconds.\n"
                       << "============================\n";
 
-            benchmark[std::to_string(i * 4 + j + 1)] = {
+            benchmark[std::to_string(i * 3 + j + 1)] = {
                 {"threads", i + 1},
                 {"particles_per_type", particles},
                 {"time_seconds", elapsed.count()}};
