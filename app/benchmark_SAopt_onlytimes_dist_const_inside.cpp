@@ -26,6 +26,11 @@ std::chrono::duration<double> measure(int threads, int particles, std::shared_pt
 
     Swarm::Optimizers::SAOptimizer<T, dim> swarm(fitness, initial_best, a, b, nN, nC, chaosMap, max_iterations, 395.0f, 0.95f);
 
+    Swarm::Point<T, dim> center(0.f);
+    T radius = 2.f;
+    auto dist_constraint = Swarm::makeMaxDistanceConstraint<T, dim>(center, radius);
+    swarm.addConstraint(dist_constraint);
+
     auto start = std::chrono::high_resolution_clock::now();
     swarm.run();
     auto end = std::chrono::high_resolution_clock::now();
@@ -75,7 +80,7 @@ int main()
         }
     }
 
-    std::ofstream benchmark_file("/work/u10768804/benchmark/benchmark_SAopt.json");
+    std::ofstream benchmark_file("/work/u10768804/benchmark/benchmark_SAopt_onlytimes_dist_const_inside.json");
     benchmark_file << benchmark.dump(4);
     benchmark_file.close();
 
