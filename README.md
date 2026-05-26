@@ -14,9 +14,23 @@ Each algorithm has been designed to support **arbitrary non-linear constraints**
 
 The three algorithms were packed in a fully-templated, header-only, dependency-less (with optional support for OpenMP) library. In order to run benchmarks, the [nlohmann/json](https://github.com/nlohmann/json) library must be available.
 
+### Usage
+
+First, clone the repository
+
+    git clone https://github.com/etabeta1/particle-swarm-optimization
+
+If you want to use this library in another project, just `#include` the files in `src/`.
+
+If you want to run the tests, run `make test`.
+
+If you want to compile the benchmarks, run `make dist`, the resulting executables will appear in the `bin/` folder
+
 ### Documentation
 
 The full project documentation can be found in the [official documentation](https://etabeta1.github.io/particle-swarm-optimization/).
+
+If no internet connection is available, with `doxygen` installed, just run `make docs`.
 
 ### Credits
 
