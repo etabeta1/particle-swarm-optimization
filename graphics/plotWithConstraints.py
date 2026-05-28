@@ -36,34 +36,21 @@ X_grid = np.linspace(xmin, xmax, 1000)
 Y_grid = np.linspace(ymin, ymax, 1000)
 X_surf, Y_surf = np.meshgrid(X_grid, Y_grid)
 
-# --- Configurazione del Cilindro ---
-R_cyl = 9.5  # Raggio impostato a 5
+
+R_cyl = 9.5  
 theta = np.linspace(0, 2 * np.pi, 100)
-# Definiamo le altezze del cilindro usando i limiti dei tuoi dati Z
 z_cyl_range = np.linspace(zmin, zmax, 50)
 
-# Creazione della griglia del cilindro
 Theta, Z_cyl = np.meshgrid(theta, z_cyl_range)
 X_cyl = 10 +R_cyl * np.cos(Theta)
 Y_cyl =10 + R_cyl * np.sin(Theta)
 
-# --- Plot del Cilindro ---
-# Usiamo una mesh wireframe (a griglia) o plot_surface trasparente
-# così non copre i punti all'interno.
 ax.plot_surface(X_cyl, Y_cyl, Z_cyl, color='gray', alpha=0.15, edgecolor='black', linewidth=0.3)
 
-# --- Nuova Drop-Wave Function ---
-# Calcoliamo la distanza radiale dall'origine (raggio)
 R_surf = np.sqrt(X_surf**2 + Y_surf**2)
-
-# Formula Drop-Wave: -(1 + cos(12*sqrt(x^2+y^2))) / (0.5*(x^2+y^2) + 2)
-# Nota: aggiungiamo un piccolo epsilon (1e-10) per evitare divisioni per zero se R è 0
 Z_surf_raw = -(1 + np.cos(12 * R_surf)) / (0.5 * (R_surf**2) + 2)
-
-# --- Normalizzazione e Scaling (Mantengo la tua logica) ---
 Z_surf_normalized = (Z_surf_raw - np.min(Z_surf_raw)) / (np.max(Z_surf_raw) - np.min(Z_surf_raw))
 Z_surf = zmin + Z_surf_normalized * (zmax - zmin)
-
 
 ax.plot_surface(X_surf, Y_surf, Z_surf, cmap='coolwarm', alpha=0.3)
 
@@ -104,7 +91,7 @@ ani = FuncAnimation(
     blit=False
 )
 
-writer = PillowWriter(fps=2)  # fps = 1000 / interval
+writer = PillowWriter(fps=2)  
 ani.save("SAopt_drop_dist_10.gif", writer=writer)
 
 plt.show()
