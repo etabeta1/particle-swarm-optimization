@@ -31,7 +31,7 @@ int main()
     swarm_dropwave.run();
 
     std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness4 = std::make_shared<Swarm::ObjectiveFunctions::Alpine1Function<T, dim>>();
-    Swarm::Optimizers::SAOptimizer<T, dim> swarm_ellipsoid(fitness4, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Chebyshev<T, dim>(), max_iterations, 395.0f, 0.95f, "/work/u10768804/benchmark/SAopt_convergence_ellipsoid_Chebyshev.txt");
+    Swarm::Optimizers::SAOptimizer<T, dim> swarm_ellipsoid(fitness4, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Chebyshev<T, dim>(), max_iterations, 395.0f, 0.95f, "/work/u10768804/benchmark/SAopt_convergence_alpine1_Chebyshev.txt");
     swarm_ellipsoid.run();
 
     std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness5 = std::make_shared<Swarm::ObjectiveFunctions::EllipsoidFunction<T, dim>>();
@@ -39,7 +39,7 @@ int main()
     swarm_quintic.run();
 
     std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness6 = std::make_shared<Swarm::ObjectiveFunctions::QuinticFunction<T, dim>>();
-    Swarm::Optimizers::SAOptimizer<T, dim> swarm_sphere(fitness6, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Chebyshev<T, dim>(), max_iterations, 395.0f, 0.95f, "/work/u10768804/benchmark/SAopt_convergence_sphere_Chebyshev.txt");
+    Swarm::Optimizers::SAOptimizer<T, dim> swarm_sphere(fitness6, initial_best, a, b, nN, nC, Swarm::ChaosFactory::Chebyshev<T, dim>(), max_iterations, 395.0f, 0.95f, "/work/u10768804/benchmark/SAopt_convergence_quintic_Chebyshev.txt");
     swarm_sphere.run();
 
     std::shared_ptr<Swarm::ObjectiveFunction<T, dim>> fitness7 = std::make_shared<Swarm::ObjectiveFunctions::SphereFunction<T, dim>>();
