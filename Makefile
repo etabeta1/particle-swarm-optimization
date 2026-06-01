@@ -22,6 +22,10 @@ DIST_FLAGS=$(COMMON_FLAGS) -O2 -Ijson/include
 
 all: test docs dist
 
+main: app/main.cpp
+	$(CXX) -o $(BINARY_FOLDER)/main app/main.cpp $(DIST_FLAGS)
+	./$(BINARY_FOLDER)/main
+
 test:
 	mkdir -p $(BINARY_FOLDER)
 	for test_file in $(TEST_FOLDER)/*.cpp; do \

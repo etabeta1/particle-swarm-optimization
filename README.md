@@ -22,6 +22,8 @@ First, clone the repository
 
 If you want to use this library in another project, just `#include` the files in `src/`.
 
+If you want to run a main, run `make main`.
+
 If you want to run the tests, run `make test`.
 
 If you want to compile the benchmarks, run `make dist`, the resulting executables will appear in the `bin/` folder
