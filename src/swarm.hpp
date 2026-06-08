@@ -157,6 +157,13 @@ namespace Swarm
                   b(_b),
                   current_iteration(1),
                   max_iterations(_max_iterations)
+            // Note why are you starting the iteration from 1?
+            // I woudl start from 0 sonce later you test < max_iterations and
+            // not <= max_iterations, but maybe I have not understood the logic behind it.
+            // Note: Are you sure about std::move(p), p being a reference to
+            // a shared pointer? What do you wanh to achieve with that?
+            // I would just copy the shared pointer, since it is not a big deal and it is more intuitive.
+            // But maybe I have not understood the logic behind it.
             {
                 if (!initial_best.isInsideBox(a, b))
                 {
@@ -293,6 +300,17 @@ namespace Swarm
                     {
 #pragma omp critical
                         {
+                            // This critical region is only necessary for printing.
+                            // You could have computed all quantities outside (in parallel)
+                            // instead of computing them inside the critical region.
+                            // and limit the critical region to just the printing part, which is the only part that needs to be protected.
+                            for (size_t j = 0; j < dim; j++)
+                            {
+                                positions_file << particle->getPersonalBestPosition()[j] << " ";
+                            }
+                            positions_file << particle->getPersonalBestValue() << " " // Z
+                                           << current_iteration << " "                // Iterazione (k)
+                                           << particle->getType() << "\n";            // Type (0=Normal, 1=Chaotic)
                             for (size_t j = 0; j < dim; j++)
                             {
                                 positions_file << particle->getPosition()[j] << " ";

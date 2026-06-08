@@ -30,6 +30,7 @@ namespace Swarm
          */
         Point(std::vector<T> &data)
         {
+            // NOTE I would check if the vactor has right size.
             for (size_t i = 0; i < dim; i++)
             {
                 coordinates[i] = data[i];
@@ -239,6 +240,10 @@ namespace Swarm
         {
             Point<T, dim> remainder(1);
             Point<T, dim> accum(*this);
+            // NOTE Here you could have used unsigned integers,
+            // Or at least indicate in the documentation that exponent must be
+            // greater then zero. In fact, you could have treated
+            // also the zero case, returning a point with all coordinates equal to 1.
 
             while (exponent > 1)
             {

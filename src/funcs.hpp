@@ -15,6 +15,9 @@
 template <typename T = float>
 inline T generate_random(T a, T b)
 {
+    // NOTE you should have one generator per thread
+    // and use std::seed_seq to generate the seeds to be distributed
+    // among thread
     static std::mt19937 generator(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 
     if constexpr (std::is_integral_v<T>)
