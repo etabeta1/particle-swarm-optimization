@@ -113,6 +113,7 @@ namespace Swarm
                 }
             }
 
+            // Why float
             float current_value = func.evaluate(this->position);
 
             // Minimization
@@ -150,6 +151,7 @@ namespace Swarm
          * \brief Returns the personal best value of the particle.
          * \return A float representing the particle's personal best value.
          */
+        // Why float
         float getPersonalBestValue()
         {
             return personal_best.value;
@@ -218,6 +220,9 @@ namespace Swarm
 
             float w = 0.9f - (0.5f * static_cast<float>(current_iteration) / static_cast<float>(max_iterations));
 
+            // NOTE Why has it be commented? Should not you
+            // generate new random numbers at each iteration?
+            // Maybe I have not understood the logic behind it.
             // float k1 = generate_random(0.0f, 1.0f) * c1;
             // float k2 = generate_random(0.0f, 1.0f) * c2;
 
